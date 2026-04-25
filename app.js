@@ -106,6 +106,7 @@ const manualRegion = [
 const state = {
   page: "overview",
   selectedProjectId: "offline-learning-ghana",
+  builderProfile: null,
   filters: {
     country: "All",
     sector: "All",
@@ -134,6 +135,12 @@ function gapClass(value) {
   if (value === "Medium-High") return "amber";
   if (value === "Medium") return "blue";
   return "green";
+}
+
+function fitClass(value) {
+  if (value === "High") return "green";
+  if (value === "Medium-High") return "blue";
+  return "amber";
 }
 
 function compactNumber(value) {
@@ -168,29 +175,60 @@ function kpi(label, value) {
   return `<article class="kpi"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
 }
 
+function sectionHeader(title, kicker = "") {
+  return `<div class="section-header">
+    <div>
+      <h2>${escapeHtml(title)}</h2>
+      ${kicker ? `<p>${escapeHtml(kicker)}</p>` : ""}
+    </div>
+  </div>`;
+}
+
+function funderWorkflow(active) {
+  const steps = [
+    { id: "discover", label: "Discover", text: "Filter and browse self-reported projects." },
+    { id: "review", label: "Review", text: "Open an evaluation packet." },
+    { id: "act", label: "Act", text: "Shortlist, request evidence, or invite." },
+  ];
+  return `<section class="workflow" aria-label="Funder workflow">
+    ${steps
+      .map(
+        (step, index) => `<article class="${step.id === active ? "active" : ""}">
+          <span>${index + 1}</span>
+          <div><strong>${escapeHtml(step.label)}</strong><p>${escapeHtml(step.text)}</p></div>
+        </article>`,
+      )
+      .join("")}
+  </section>`;
+}
+
 function projectCard(project, featured = false) {
   return `<article class="card project-card">
-    <div>
+    <div class="project-card-head">
       <h3>${escapeHtml(project.title)}</h3>
       <div class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.sector)} · ${escapeHtml(project.stage)}</div>
     </div>
     <p>${escapeHtml(project.description)}</p>
+    <dl class="project-facts">
+      <div><dt>Funding Need</dt><dd>${escapeHtml(project.fundingNeed)}</dd></div>
+      <div><dt>Beneficiaries</dt><dd>${escapeHtml(project.beneficiaries)}</dd></div>
+    </dl>
     <div class="badge-row">
       <span class="badge blue">Readiness: ${escapeHtml(project.readiness)}</span>
-      <span class="badge ${gapClass(project.opportunityGap)}">Gap: ${escapeHtml(project.opportunityGap)}</span>
+      <span class="badge ${gapClass(project.opportunityGap)}">Opportunity Gap: ${escapeHtml(project.opportunityGap)}</span>
       <span class="badge green">Verification: ${escapeHtml(project.verification)}</span>
     </div>
     <div class="card-footer">
-      <span class="money">Funding Need: ${escapeHtml(project.fundingNeed)}</span>
+      <span class="money">${featured ? "Featured gap" : "Evaluation packet"}</span>
       <button class="btn primary packet-btn" data-project-id="${escapeHtml(project.id)}">${featured ? "View Evaluation Packet" : "View Evaluation Packet"}</button>
     </div>
   </article>`;
 }
 
-function pageHeader(id, title, subtitle, description = "", actions = "") {
+function pageHeader(id, title, subtitle, description = "", actions = "", portal = "Funder Portal") {
   return `<header class="page-header">
     <div>
-      <div class="eyebrow">Opportunity Atlas</div>
+      <div class="eyebrow">${escapeHtml(portal)}</div>
       <h1 id="${id}">${escapeHtml(title)}</h1>
       <p class="lead">${escapeHtml(subtitle)}</p>
       ${description ? `<p class="lead">${escapeHtml(description)}</p>` : ""}
@@ -208,6 +246,7 @@ function renderOverview() {
       "Discover overlooked young builders through their projects.",
       "Opportunity Atlas turns self-reported local projects into structured, funder-readable opportunity profiles, helping opportunity providers discover young builders beyond traditional credentials and networks.",
     )}
+    ${funderWorkflow("discover")}
     <section class="grid four">
       ${kpi("Submitted Projects", "24")}
       ${kpi("Countries Represented", "9")}
@@ -216,16 +255,16 @@ function renderOverview() {
     </section>
     <section class="section grid two">
       <article class="card chart-card">
-        <h2>Projects by Sector</h2>
+        ${sectionHeader("Projects by Sector", "Submitted local projects by primary impact area.")}
         ${barList(manualSector)}
       </article>
       <article class="card chart-card">
-        <h2>Projects by Region</h2>
+        ${sectionHeader("Projects by Region", "Geographic distribution of submitted project signals.")}
         ${barList(manualRegion)}
       </article>
     </section>
     <section class="section">
-      <h2>Featured Opportunity Gaps</h2>
+      ${sectionHeader("Featured Opportunity Gaps", "Self-reported projects with reviewable funding gaps and structured project context.")}
       <div class="grid three">
         ${featured.map((project) => projectCard(project, true)).join("")}
       </div>
@@ -265,9 +304,10 @@ function renderDiscovery() {
   $("#discovery").innerHTML = `
     ${pageHeader(
       "discovery-title",
-      "Project Discovery",
+      "Discover Projects",
       "Browse self-reported projects from young builders and grassroots teams.",
     )}
+    ${funderWorkflow("discover")}
     <section class="filter-panel" aria-label="Project filters">
       ${filterOptions("Country", "country", ["All", "Ghana", "India", "Kenya", "Nigeria", "Indonesia"])}
       ${filterOptions("Sector", "sector", ["All", "Education", "Health", "Climate", "Agriculture", "Civic Tech"])}
@@ -341,7 +381,7 @@ function renderFunders(funders) {
         (funder) => `<article class="card">
           <h3>${escapeHtml(funder.name)}</h3>
           <div class="badge-row">
-            <span class="badge blue">Fit: ${escapeHtml(funder.fit)}</span>
+            <span class="badge ${fitClass(funder.fit)}">Fit: ${escapeHtml(funder.fit)}</span>
             <span class="badge green">Matched funding: ${escapeHtml(funder.amountLabel)}</span>
           </div>
           <p class="meta">${escapeHtml(funder.reason)}</p>
@@ -362,14 +402,23 @@ function renderDetail() {
       project.title,
       `${project.country} · ${project.sector} · ${project.stage}`,
       "",
-      `<span class="badge green">Verification Status: ${escapeHtml(project.verification)}</span>
+      `<span class="badge green">Verification: ${escapeHtml(project.verification)}</span>
+       <span class="badge blue">Readiness: ${escapeHtml(project.readiness)}</span>
+       <span class="badge ${gapClass(project.opportunityGap)}">Opportunity Gap: ${escapeHtml(project.opportunityGap)}</span>
        <button class="btn">Shortlist</button>
        <button class="btn">Request Evidence</button>
        <button class="btn primary">Invite to Apply</button>`,
     )}
+    ${funderWorkflow("review")}
+    <section class="packet-strip">
+      <article><span>Packet Type</span><strong>Funder Review</strong></article>
+      <article><span>Primary Need</span><strong>${escapeHtml(project.fundingNeed)} pilot grant</strong></article>
+      <article><span>Evidence Status</span><strong>Self-reported</strong></article>
+      <article><span>OECD Layer</span><strong>Funding intelligence</strong></article>
+    </section>
     <section class="section detail-layout">
       <article class="card">
-        <h2>Opportunity Profile</h2>
+        ${sectionHeader("Project Snapshot", "Structured project record prepared for funder screening.")}
         <div class="profile-grid">
           ${renderProfileField("Project", project.title)}
           ${renderProfileField("Country", project.country)}
@@ -383,7 +432,7 @@ function renderDetail() {
         </div>
       </article>
       <article class="card">
-        <h2>Project Readiness</h2>
+        ${sectionHeader("Readiness & Risks", "Readiness is separate from funder relevance.")}
         <span class="badge blue">${escapeHtml(project.readiness)}</span>
         <div class="split-list section">
           <div>
@@ -409,14 +458,10 @@ function renderDetail() {
     </section>
 
     <section class="section card">
-      <h2>Similar Funded Projects from OECD Records</h2>
+      ${sectionHeader("Funding Context", "Historical philanthropy records that may indicate funder relevance.")}
+      <p class="lead">OECD philanthropy data is used as a funding intelligence layer. It helps identify which funders may care about this project area based on historical funding behavior.</p>
       ${renderSimilarTable(intel.similarProjects || [])}
       <div class="section note-panel"><strong>Similar funded projects indicate funder relevance, not proof of project quality.</strong></div>
-    </section>
-
-    <section class="section card">
-      <h2>Funder Relevance</h2>
-      <p class="lead">OECD philanthropy data is used as a funding intelligence layer. It helps identify which funders may care about this project area based on historical funding behavior.</p>
       <div class="split-list">
         <div>
           <h3>Relevant funding patterns</h3>
@@ -438,9 +483,9 @@ function renderDetail() {
     </section>
 
     <section class="section card">
-      <h2>Opportunity Gap Signal</h2>
+      ${sectionHeader("Opportunity Gap Signal", "Funding-pattern context for responsible investigation.")}
       <div class="badge-row">
-        <span class="badge ${gapClass(gapLabel)}">${escapeHtml(gapLabel)}</span>
+        <span class="badge ${gapClass(gapLabel)}">Opportunity Gap: ${escapeHtml(gapLabel)}</span>
         <span class="badge blue">Country-sector funding: ${escapeHtml(gap.countrySectorAmountLabel || "Needs review")}</span>
         <span class="badge green">Sector median by country: ${escapeHtml(gap.sectorMedianCountryAmountLabel || "Needs review")}</span>
       </div>
@@ -454,16 +499,22 @@ function renderDetail() {
       <div class="note-panel"><strong>Underfunding is a signal, not a conclusion.</strong></div>
     </section>
 
-    <section class="section card">
-      <h2>Recommended Review Questions</h2>
-      <h3>Before shortlisting, ask:</h3>
-      <ol>
-        <li>Can the builder provide a demo or screenshots?</li>
-        <li>Is there a letter from one pilot school?</li>
-        <li>What is the 3-month pilot budget?</li>
-        <li>How many students will be reached?</li>
-        <li>What outcome will be measured?</li>
-      </ol>
+    <section class="section act-panel">
+      <div>
+        ${sectionHeader("Act", "Use review actions only after checking evidence needs and funding context.")}
+        <ol>
+          <li>Can the builder provide a demo or screenshots?</li>
+          <li>Is there a letter from one pilot school?</li>
+          <li>What is the 3-month pilot budget?</li>
+          <li>How many students will be reached?</li>
+          <li>What outcome will be measured?</li>
+        </ol>
+      </div>
+      <div class="act-actions">
+        <button class="btn">Shortlist</button>
+        <button class="btn">Request Evidence</button>
+        <button class="btn primary">Invite to Apply</button>
+      </div>
     </section>
   `;
 }
@@ -474,8 +525,11 @@ function renderSubmit() {
       "submit-title",
       "Submit a Local Project",
       "Turn an informal project into a funder-readable opportunity profile.",
+      "",
+      "",
+      "Builder Portal",
     )}
-    <section class="grid two">
+    <section class="builder-shell">
       <form id="project-form" class="card">
         <div class="form-grid">
           <label>Project Title<input name="title" required value="Community tutoring map for public libraries" /></label>
@@ -492,9 +546,39 @@ function renderSubmit() {
           <button class="btn primary" type="submit">Generate Opportunity Profile</button>
         </div>
       </form>
+    </section>
+  `;
+}
+
+function renderBuilderPreview() {
+  const profile = state.builderProfile;
+  $("#builder-preview").innerHTML = `
+    ${pageHeader(
+      "builder-preview-title",
+      "Structured Profile Preview",
+      "Preview how a self-reported project appears to funders.",
+      "",
+      "",
+      "Builder Portal",
+    )}
+    <section class="builder-shell">
       <article id="profile-preview" class="card">
-        <h2>Generated Profile Preview</h2>
-        <div class="empty">Generate an opportunity profile to preview the structured funder-readable record.</div>
+        ${sectionHeader("Self-Reported Opportunity Profile", "This preview is structured for funder review.")}
+        ${
+          profile
+            ? `<div class="profile-grid">
+                ${renderProfileField("Project title", profile.title)}
+                ${renderProfileField("Country", profile.country)}
+                ${renderProfileField("Region", profile.region)}
+                ${renderProfileField("Sector", profile.sector)}
+                ${renderProfileField("Beneficiaries", profile.beneficiaries)}
+                ${renderProfileField("Stage", profile.stage)}
+                ${renderProfileField("Funding need", profile.funding)}
+                ${renderProfileField("Verification status", "Self-reported")}
+              </div>
+              <div class="section note-panel">Your project has been converted into a structured opportunity profile. In this MVP, all submissions are self-reported and not independently verified.</div>`
+            : `<div class="empty">Submit a project to generate a structured funder-readable preview.</div>`
+        }
       </article>
     </section>
   `;
@@ -509,6 +593,7 @@ function renderSignals() {
       "OECD Funding Signals",
       "Explore historical philanthropy funding patterns used to contextualize local projects.",
     )}
+    ${funderWorkflow("review")}
     <section class="grid four">
       ${kpi("Total Funding", metrics.totalFundingLabel || "$68.2B")}
       ${kpi("Funding Records", metrics.recordCountLabel || "116K+")}
@@ -523,19 +608,19 @@ function renderSignals() {
     </section>
     <section class="section grid two">
       <article class="card chart-card">
-        <h2>Funding by Year</h2>
+        ${sectionHeader("Funding by Year")}
         ${barList(yearly.map((item) => ({ label: item.year, amount: item.amount, amountLabel: item.amountLabel })), "amount")}
       </article>
       <article class="card chart-card">
-        <h2>Top Recipient Countries</h2>
+        ${sectionHeader("Top Recipient Countries")}
         ${barList(oecd.topRecipientCountries || [], "amount")}
       </article>
       <article class="card chart-card">
-        <h2>Top Sectors</h2>
+        ${sectionHeader("Top Sectors")}
         ${barList(oecd.topSectors || [], "amount")}
       </article>
       <article class="card chart-card">
-        <h2>Top Funders</h2>
+        ${sectionHeader("Top Funders")}
         ${barList(oecd.topFunders || [], "amount")}
       </article>
     </section>
@@ -549,8 +634,9 @@ function renderCurrentPage() {
   renderOverview();
   renderDiscovery();
   renderDetail();
-  renderSubmit();
   renderSignals();
+  renderSubmit();
+  renderBuilderPreview();
   document.querySelectorAll(".page").forEach((page) => page.classList.toggle("active", page.id === state.page));
   document.querySelectorAll(".nav-link").forEach((link) => link.classList.toggle("active", link.dataset.page === state.page));
 }
@@ -586,21 +672,16 @@ document.addEventListener("submit", (event) => {
   if (event.target.id !== "project-form") return;
   event.preventDefault();
   const form = new FormData(event.target);
-  const preview = $("#profile-preview");
-  preview.classList.add("active");
-  preview.innerHTML = `
-    <h2>Generated Profile Preview</h2>
-    <div class="profile-grid">
-      ${renderProfileField("Project title", form.get("title"))}
-      ${renderProfileField("Country", form.get("country"))}
-      ${renderProfileField("Sector", form.get("sector"))}
-      ${renderProfileField("Beneficiaries", form.get("beneficiaries"))}
-      ${renderProfileField("Stage", form.get("stage"))}
-      ${renderProfileField("Funding need", form.get("funding"))}
-      ${renderProfileField("Verification status", "Self-reported")}
-    </div>
-    <div class="section note-panel">Your project has been converted into a structured opportunity profile. In this MVP, all submissions are self-reported and not independently verified.</div>
-  `;
+  state.builderProfile = {
+    title: form.get("title"),
+    country: form.get("country"),
+    region: form.get("region"),
+    sector: form.get("sector"),
+    beneficiaries: form.get("beneficiaries"),
+    stage: form.get("stage"),
+    funding: form.get("funding"),
+  };
+  goTo("builder-preview");
 });
 
 renderCurrentPage();

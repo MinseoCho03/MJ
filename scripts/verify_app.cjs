@@ -23,13 +23,15 @@ async function main() {
   await page.waitForSelector("#overview.active");
   const overviewTitle = await page.locator("#overview-title").textContent();
 
-  await page.getByRole("button", { name: "Project Discovery" }).click();
+  await page.getByRole("button", { name: "Discover Projects" }).click();
   await page.locator('#discovery select[data-filter="country"]').selectOption("Ghana");
   const ghanaCards = await page.locator("#discovery .project-card").count();
 
   await page.locator("#discovery").getByRole("button", { name: "View Evaluation Packet" }).first().click();
   const detailTitle = await page.locator("#detail-title").textContent();
-  const similarNote = await page.getByText("Similar funded projects indicate funder relevance").textContent();
+  const projectSnapshot = await page.locator("#detail").getByRole("heading", { name: "Project Snapshot" }).textContent();
+  const fundingContext = await page.locator("#detail").getByRole("heading", { name: "Funding Context" }).textContent();
+  const similarNote = await page.locator("#detail").getByText("Similar funded projects indicate funder relevance").textContent();
   const gapLabel = await page.locator("#detail .badge").filter({ hasText: "Medium-High" }).first().textContent();
 
   await page.getByRole("button", { name: "Funding Signals" }).click();
@@ -37,7 +39,8 @@ async function main() {
 
   await page.getByRole("button", { name: "Submit Project" }).click();
   await page.getByRole("button", { name: "Generate Opportunity Profile" }).click();
-  const previewText = await page.getByText("Your project has been converted").textContent();
+  const previewTitle = await page.locator("#builder-preview-title").textContent();
+  const previewText = await page.locator("#builder-preview").getByText("Your project has been converted").textContent();
 
   await page.screenshot({ path: path.join(root, "opportunity-atlas-smoke.png"), fullPage: true });
   await browser.close();
@@ -48,9 +51,12 @@ async function main() {
         overviewTitle,
         ghanaCards,
         detailTitle,
+        projectSnapshot,
+        fundingContext,
         similarNote,
         gapLabel,
         totalFunding,
+        previewTitle,
         previewText,
         errors,
       },

@@ -12,15 +12,22 @@
         <div class="brand-mark">OA</div>
         <div>
           <strong>Opportunity Atlas</strong>
-          <span>Funder discovery</span>
+          <span>Funder intelligence dashboard</span>
         </div>
       </div>
       <nav aria-label="Primary">
-        <button class="nav-link active" data-page="overview">Overview</button>
-        <button class="nav-link" data-page="discovery">Project Discovery</button>
-        <button class="nav-link" data-page="detail">Evaluation Packet</button>
-        <button class="nav-link" data-page="submit">Submit Project</button>
-        <button class="nav-link" data-page="signals">Funding Signals</button>
+        <div class="nav-group">
+          <span>Funder Portal</span>
+          <button class="nav-link active" data-page="overview">Overview</button>
+          <button class="nav-link" data-page="discovery">Discover Projects</button>
+          <button class="nav-link" data-page="detail">Evaluation Packet</button>
+          <button class="nav-link" data-page="signals">Funding Signals</button>
+        </div>
+        <div class="nav-group">
+          <span>Builder Portal</span>
+          <button class="nav-link" data-page="submit">Submit Project</button>
+          <button class="nav-link" data-page="builder-preview">Structured Profile Preview</button>
+        </div>
       </nav>
       <div class="sidebar-note">
         <strong>Responsible use</strong>
@@ -32,8 +39,9 @@
       <section id="overview" class="page active" aria-labelledby="overview-title"></section>
       <section id="discovery" class="page" aria-labelledby="discovery-title"></section>
       <section id="detail" class="page" aria-labelledby="detail-title"></section>
-      <section id="submit" class="page" aria-labelledby="submit-title"></section>
       <section id="signals" class="page" aria-labelledby="signals-title"></section>
+      <section id="submit" class="page" aria-labelledby="submit-title"></section>
+      <section id="builder-preview" class="page" aria-labelledby="builder-preview-title"></section>
     </main>
 
     <script src="./data/oecd-data.js"></script>
