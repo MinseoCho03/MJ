@@ -584,6 +584,99 @@ function gapRationale(project, intel) {
   return items;
 }
 
+const DONUT_COLORS = [
+  "#1d5fd0", "#08795f", "#e08614", "#9b3eab",
+  "#d94f45", "#0e9cb5", "#5c7cfa", "#f59e42",
+  "#64748b", "#16a34a",
+];
+
+function yearLineChart(items, valueKey = "amount") {
+  const values = items.map((item) => item[valueKey] || 0);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const floor = min - range * 0.6;
+  const ceil = max + range * 0.4;
+  const span = ceil - floor;
+
+  const W = 540, H = 130, ml = 28, mr = 28, mt = 28, mb = 28;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const n = items.length;
+  const toX = (i) => ml + (i / (n - 1)) * pw;
+  const toY = (v) => mt + ph - ((v - floor) / span) * ph;
+
+  const pts = items.map((item, i) => ({
+    x: toX(i),
+    y: toY(item[valueKey] || 0),
+    label: String(item.label),
+    amtLabel: item.amountLabel || compactNumber(item[valueKey] || 0),
+    value: item[valueKey] || 0,
+  }));
+
+  const polyPts = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const areaPath =
+    `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}` +
+    pts.slice(1).map((p) => ` L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join("") +
+    ` L${pts[n - 1].x.toFixed(1)},${H - mb} L${pts[0].x.toFixed(1)},${H - mb} Z`;
+
+  const deltas = pts.slice(1).map((p, i) => {
+    const delta = p.value - pts[i].value;
+    const color = delta >= 0 ? "#0d9b72" : "#e05050";
+    const mx = ((pts[i].x + p.x) / 2).toFixed(1);
+    const my = (Math.min(pts[i].y, p.y) - 10).toFixed(1);
+    return `<text x="${mx}" y="${my}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${color}">${delta >= 0 ? "+" : "−"}$${Math.round(Math.abs(delta))}M</text>`;
+  });
+
+  return `<div class="lchart-outer"><svg class="lchart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="lcg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2868c7" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="#2868c7" stop-opacity="0.01"/>
+      </linearGradient>
+    </defs>
+    <path d="${areaPath}" fill="url(#lcg)"/>
+    <polyline points="${polyPts}" fill="none" stroke="#2868c7" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts
+      .map(
+        (p) =>
+          `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" class="lchart-dot"/>` +
+          `<text x="${p.x.toFixed(1)}" y="${(p.y - 12).toFixed(1)}" text-anchor="middle" class="lchart-amt">${escapeHtml(p.amtLabel)}</text>` +
+          `<text x="${p.x.toFixed(1)}" y="${(H - 8).toFixed(1)}" text-anchor="middle" class="lchart-lbl">${escapeHtml(p.label)}</text>`,
+      )
+      .join("")}
+    ${deltas.join("")}
+  </svg></div>`;
+}
+
+function donutChart(items, valueKey = "amount") {
+  const slice = items.slice(0, 8);
+  const total = slice.reduce((sum, item) => sum + (item[valueKey] || 0), 0) || 1;
+  let cum = 0;
+  const segments = slice.map((item, i) => {
+    const pct = ((item[valueKey] || 0) / total) * 100;
+    const start = cum;
+    cum += pct;
+    return { ...item, pct, start, color: DONUT_COLORS[i] };
+  });
+  const gradient = segments
+    .map((s) => `${s.color} ${s.start.toFixed(1)}% ${(s.start + s.pct).toFixed(1)}%`)
+    .join(", ");
+  return `<div class="donut-wrap">
+    <div class="donut" style="background:conic-gradient(${gradient})"></div>
+    <div class="donut-legend">
+      ${segments
+        .map(
+          (s) => `<div class="donut-item">
+        <span class="donut-dot" style="background:${s.color}"></span>
+        <span class="donut-name">${escapeHtml(s.label)}</span>
+        <span class="donut-amt">${escapeHtml(s.amountLabel || "")}</span>
+      </div>`,
+        )
+        .join("")}
+    </div>
+  </div>`;
+}
+
 function barList(items, valueKey = "count") {
   const max = Math.max(...items.map((item) => item[valueKey] || 0), 1);
   return `<div class="bar-list">
@@ -1370,33 +1463,27 @@ function renderSignals() {
     <section class="grid four">
       ${kpi("Total Funding", metrics.totalFundingLabel || "$68.2B")}
       ${kpi("Funding Records", metrics.recordCountLabel || "116K+")}
-      ${kpi("Recipient Countries", `${metrics.recipientCountries || 163}+`)}
-      ${kpi("Donor Organizations", `${metrics.donorOrganizations || 506}+`)}
+      ${kpi("Recipient Countries", String(metrics.recipientCountries || 163))}
+      ${kpi("Donor Organizations", String(metrics.donorOrganizations || 506))}
     </section>
-    <section class="section filter-panel">
-      ${filterOptions("Country", "country", ["All", "Ghana", "India", "Kenya", "Nigeria", "Indonesia"])}
-      ${filterOptions("Sector", "sector", ["All", "Education", "Health", "Climate", "Agriculture", "Civic Tech"])}
-      <label>Donor Country<select><option>All</option><option>United States</option><option>United Kingdom</option><option>Netherlands</option><option>Switzerland</option></select></label>
-      <label>Year<select><option>All</option>${yearly.map((item) => `<option>${escapeHtml(item.year)}</option>`).join("")}</select></label>
-    </section>
+    <article class="card chart-card section">
+      ${sectionHeader("Funding by Year", "Total disbursements per year · USD millions, deflated")}
+      ${yearLineChart(yearly.map((item) => ({ label: item.year, amount: item.amount, amountLabel: item.amountLabel })), "amount")}
+    </article>
     <section class="section grid two">
       <article class="card chart-card">
-        ${sectionHeader("Funding by Year")}
-        ${barList(yearly.map((item) => ({ label: item.year, amount: item.amount, amountLabel: item.amountLabel })), "amount")}
-      </article>
-      <article class="card chart-card">
-        ${sectionHeader("Top Recipient Countries")}
-        ${barList(oecd.topRecipientCountries || [], "amount")}
-      </article>
-      <article class="card chart-card">
-        ${sectionHeader("Top Sectors")}
-        ${barList(oecd.topSectors || [], "amount")}
+        ${sectionHeader("Funding by Sector", "Share of total disbursements")}
+        ${donutChart(oecd.topSectors || [], "amount")}
       </article>
       <article class="card chart-card">
         ${sectionHeader("Top Funders")}
         ${barList(oecd.topFunders || [], "amount")}
       </article>
     </section>
+    <article class="card chart-card section">
+      ${sectionHeader("Top Recipient Countries")}
+      ${barList(oecd.topRecipientCountries || [], "amount")}
+    </article>
     <section class="section note-panel">
       <strong>OECD data is used as funding intelligence, not talent data.</strong> It helps funders understand historical philanthropy funding patterns, similar funded projects, and funder relevance.
     </section>
