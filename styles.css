@@ -456,6 +456,21 @@ h3 {
   margin-bottom: 16px;
 }
 
+.card-head-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.card-head-row .section-header {
+  margin-bottom: 16px;
+}
+
+.card-head-row > .btn {
+  flex: 0 0 auto;
+}
+
 .section-header p {
   margin: 5px 0 0;
   color: var(--muted);
@@ -1052,6 +1067,27 @@ textarea {
 .field strong {
   display: block;
   margin-top: 5px;
+}
+
+.card-detail-block {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+
+.card-detail-block span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.card-detail-block p {
+  margin: 8px 0 0;
+  color: var(--muted-strong);
+  line-height: 1.6;
 }
 
 .field.green {
@@ -1673,5 +1709,9 @@ a.btn {
   .bar-row {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .card-head-row {
+    display: grid;
   }
 }

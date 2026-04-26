@@ -292,6 +292,7 @@ function initialPage() {
     "signals",
     "submit",
     "builder-history",
+    "submission-detail",
     "builder-notifications",
     "messages",
     "builder-profile",
@@ -370,6 +371,11 @@ function fundingAmountValue(value) {
 function fundingAmountLabel(value) {
   if (!value) return "$0";
   return `$${compactNumber(value)}`;
+}
+
+function safeExternalUrl(value) {
+  const text = String(value || "").trim();
+  return /^https?:\/\//i.test(text) ? text : "";
 }
 
 function truncateText(value, limit = 210) {
@@ -1567,9 +1573,8 @@ function renderBuilderHistory(projectList) {
             <span class="badge ${reviewStatusClass(reviewStatus)}">${escapeHtml(reviewStatus)}</span>
           </div>
           <div class="action-row">
-            <a class="btn" href="../funder/index.html#discovery">View in Funder Dashboard</a>
             <button class="btn contact-funder-btn" data-project-id="${escapeHtml(project.id)}">Contact Funder</button>
-            <button class="btn primary packet-btn" data-project-id="${escapeHtml(project.id)}">Open Evaluation Packet</button>
+            <button class="btn primary submission-detail-btn" data-project-id="${escapeHtml(project.id)}">View Detail</button>
           </div>
         </article>`;
       })
@@ -1699,8 +1704,57 @@ function renderBuilderHistoryPage() {
       "Builder Portal",
     )}
     <section class="section card">
-      ${sectionHeader("Submitted Projects", "These profiles are visible to funders in the Discovery workflow.")}
+      ${sectionHeader("Submission History", "Projects you submitted through the Builder Portal.")}
       ${renderBuilderHistory(submitted)}
+    </section>
+  `;
+}
+
+function renderSubmissionDetailPage() {
+  const target = $("#submission-detail");
+  if (!target) return;
+  const project = getProject();
+  const evidenceUrl = safeExternalUrl(project.evidenceLink);
+  target.innerHTML = `
+    ${pageHeader(
+      "submission-detail-title",
+      project.title,
+      "Submitted project record as it appears in your Builder Portal history.",
+      "",
+      `<button class="btn route-btn" data-page="builder-history" type="button">Back to History</button>`,
+      "Builder Portal",
+    )}
+    <section class="card">
+      <div class="card-head-row">
+        ${sectionHeader("Submitted Project Detail", "Review the information you submitted for funder screening.")}
+        ${evidenceUrl ? `<a class="btn primary" href="${escapeHtml(evidenceUrl)}" target="_blank" rel="noopener noreferrer">Open Evidence Link</a>` : ""}
+      </div>
+      <div class="profile-grid">
+        ${renderProfileField("Builder", builderName(project))}
+        ${renderProfileField("Builder Role", builderRole(project))}
+        ${renderProfileField("Project Title", project.title)}
+        ${renderProfileField("Country", project.country)}
+        ${renderProfileField("Region", project.region)}
+        ${renderProfileField("Sector", project.sector)}
+        ${renderProfileField("Subsector", project.subsector)}
+        ${renderProfileField("Target Beneficiaries", project.beneficiaries)}
+        ${renderProfileField("Current Stage", project.stage)}
+        ${renderProfileField("Funding Need", project.fundingNeed)}
+        ${renderProfileField("Verification Status", project.verification)}
+        ${renderProfileField("Readiness", project.readiness)}
+        ${renderProfileField("Opportunity Gap", project.opportunityGap)}
+        ${project.evidenceLink ? renderProfileField("Evidence Link", project.evidenceLink) : ""}
+        ${project.pilotPartner ? renderProfileField("Pilot / Local Partner", project.pilotPartner) : ""}
+        ${project.usersReached ? renderProfileField("Current Users / Beneficiaries", project.usersReached) : ""}
+        ${project.budgetBreakdown ? renderProfileField("Budget Breakdown", project.budgetBreakdown) : ""}
+        ${project.teamBackground ? renderProfileField("Team Background", project.teamBackground) : ""}
+        ${project.tractionEvidence ? renderProfileField("Traction / Evidence", project.tractionEvidence) : ""}
+        ${project.impactMeasurement ? renderProfileField("Impact Measurement Plan", project.impactMeasurement) : ""}
+      </div>
+      <div class="section card-detail-block">
+        <span>Project Description</span>
+        <p>${escapeHtml(project.description)}</p>
+      </div>
     </section>
   `;
 }
@@ -1844,6 +1898,7 @@ function renderDetail() {
   const gapReasons = project.gapRationale || gapRationale(project, intel);
   const stageClass = project.stage === "Pilot-ready" ? "green" : project.stage === "Idea" ? "amber" : "blue";
   const recommendation = recommendationSignal(project);
+  const evidenceUrl = safeExternalUrl(project.evidenceLink);
   $("#detail").innerHTML = `
     ${pageHeader(
       "detail-title",
@@ -1865,7 +1920,10 @@ function renderDetail() {
     </section>
     <section class="section">
       <article class="card">
-        ${sectionHeader("Project Snapshot", "Structured project record prepared for funder screening.")}
+        <div class="card-head-row">
+          ${sectionHeader("Project Snapshot", "Structured project record prepared for funder screening.")}
+          ${evidenceUrl ? `<a class="btn primary" href="${escapeHtml(evidenceUrl)}" target="_blank" rel="noopener noreferrer">Open Evidence Link</a>` : ""}
+        </div>
         <div class="profile-grid">
           ${renderProfileField("Project", project.title)}
           <div class="field">
@@ -2168,6 +2226,7 @@ function renderCurrentPage() {
   renderMessages();
   renderSubmit();
   renderBuilderHistoryPage();
+  renderSubmissionDetailPage();
   renderBuilderNotificationsPage();
   document.querySelectorAll(".page").forEach((page) => page.classList.toggle("active", page.id === state.page));
   document.querySelectorAll(".nav-link").forEach((link) => link.classList.toggle("active", link.dataset.page === state.page));
@@ -2250,6 +2309,13 @@ document.addEventListener("click", (event) => {
     const project = getProject(contactFunder.dataset.projectId);
     ensureThread(project, "builder");
     goTo("messages");
+    return;
+  }
+
+  const submissionDetail = event.target.closest(".submission-detail-btn");
+  if (submissionDetail) {
+    state.selectedProjectId = submissionDetail.dataset.projectId;
+    goTo("submission-detail");
     return;
   }
 
