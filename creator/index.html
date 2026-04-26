@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Opportunity Atlas — Funder Portal</title>
+    <title>Opportunity Atlas — Builder Portal</title>
     <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
@@ -12,33 +12,35 @@
         <div class="brand-mark">OA</div>
         <div>
           <strong>Opportunity Atlas</strong>
-          <span>Funder intelligence dashboard</span>
+          <span>Builder portal</span>
         </div>
       </div>
       <nav aria-label="Primary">
         <div class="nav-group">
-          <span>Funder Portal</span>
-          <button class="nav-link active" data-page="overview">Overview</button>
-          <button class="nav-link" data-page="discovery">Discover Projects</button>
-          <button class="nav-link" data-page="signals">Funding Signals</button>
+          <span>Builder Portal</span>
+          <button class="nav-link active" data-page="submit">Submit Project</button>
         </div>
       </nav>
       <div class="sidebar-note">
-        <strong>Responsible use</strong>
-        <p>OECD records are used as funding intelligence, not talent data.</p>
+        <strong>How it works</strong>
+        <p>Submit your project to generate a structured funder-readable opportunity profile.</p>
       </div>
       <a href="../" style="display:block;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.07);color:#a8c4e0;font-size:13px;text-decoration:none;text-align:center;">← Switch portal</a>
     </aside>
 
     <main class="app-shell">
-      <section id="overview" class="page active" aria-labelledby="overview-title"></section>
+      <section id="overview" class="page" aria-labelledby="overview-title"></section>
       <section id="discovery" class="page" aria-labelledby="discovery-title"></section>
       <section id="detail" class="page" aria-labelledby="detail-title"></section>
       <section id="signals" class="page" aria-labelledby="signals-title"></section>
-      <section id="submit" class="page" aria-labelledby="submit-title"></section>
+      <section id="submit" class="page active" aria-labelledby="submit-title"></section>
     </main>
 
     <script src="../data/oecd-data.js"></script>
+    <script>
+      // Override default page to builder submit view
+      window.__INITIAL_PAGE__ = "submit";
+    </script>
     <script src="../app.js"></script>
   </body>
 </html>
