@@ -6,7 +6,7 @@
     <title>Opportunity Atlas — Funder Portal</title>
     <link rel="stylesheet" href="../styles.css" />
   </head>
-  <body>
+  <body data-portal="funder">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">OA</div>
@@ -34,12 +34,17 @@
     </aside>
 
     <main class="app-shell">
+      <div class="top-tabs" aria-label="Quick tabs">
+        <button class="top-tab route-btn" data-page="messages" type="button">Messages</button>
+      </div>
       <section id="overview" class="page active" aria-labelledby="overview-title"></section>
       <section id="discovery" class="page" aria-labelledby="discovery-title"></section>
       <section id="detail" class="page" aria-labelledby="detail-title"></section>
+      <section id="builder-profile" class="page" aria-labelledby="builder-profile-title"></section>
       <section id="queue" class="page" aria-labelledby="queue-title"></section>
       <section id="funder-history" class="page" aria-labelledby="funder-history-title"></section>
       <section id="signals" class="page" aria-labelledby="signals-title"></section>
+      <section id="messages" class="page" aria-labelledby="messages-title"></section>
       <section id="submit" class="page" aria-labelledby="submit-title"></section>
     </main>
 
