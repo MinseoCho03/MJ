@@ -128,6 +128,7 @@ const STORAGE_KEYS = {
   reviewStatuses: "opportunityAtlas.reviewStatuses.v1",
   builderActivity: "opportunityAtlas.builderActivity.v1",
   messages: "opportunityAtlas.messages.v1",
+  recordedAmounts: "opportunityAtlas.recordedAmounts.v1",
 };
 
 const STOPWORDS = new Set([
@@ -370,6 +371,51 @@ function saveReviewStatuses() {
     }
   });
   storageSet(STORAGE_KEYS.reviewStatuses, statuses);
+}
+
+function getRecordedAmount(project) {
+  const amounts = storageGet(STORAGE_KEYS.recordedAmounts, {});
+  return amounts[project.id] || project.fundingNeed || "";
+}
+
+function saveRecordedAmount(projectId, amount) {
+  const amounts = storageGet(STORAGE_KEYS.recordedAmounts, {});
+  amounts[projectId] = amount;
+  storageSet(STORAGE_KEYS.recordedAmounts, amounts);
+}
+
+function showFundModal(project, isEdit = false) {
+  document.getElementById("fund-modal")?.remove();
+  const modal = document.createElement("div");
+  modal.id = "fund-modal";
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-card">
+      <h2>${isEdit ? "Edit Recorded Amount" : "Record Funding"}</h2>
+      <p>${isEdit ? `Update the recorded amount for <strong>${escapeHtml(project.title)}</strong>.` : `Enter the amount committed to <strong>${escapeHtml(project.title)}</strong>.`}</p>
+      <label>Amount<input id="fund-amount-input" type="text" value="${escapeHtml(getRecordedAmount(project))}" placeholder="e.g. $10,000" /></label>
+      <div class="modal-actions">
+        <button class="btn" id="fund-cancel">Cancel</button>
+        <button class="btn primary" id="fund-confirm">${isEdit ? "Save" : "Confirm Funding"}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector("#fund-amount-input").focus();
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+  modal.querySelector("#fund-cancel").addEventListener("click", () => modal.remove());
+  modal.querySelector("#fund-confirm").addEventListener("click", () => {
+    const amount = modal.querySelector("#fund-amount-input").value.trim();
+    if (amount) saveRecordedAmount(project.id, amount);
+    if (!isEdit) {
+      project.reviewStatus = "Funded";
+      state.reviewMessage = "Funding recorded in funder history.";
+      saveReviewStatuses();
+      renderDetail();
+      renderQueue();
+    }
+    renderFunderHistory();
+    modal.remove();
+  });
 }
 
 function builderProjects() {
@@ -1130,7 +1176,7 @@ function fundedProjectCard(project) {
       <span class="badge green">Verification: ${escapeHtml(project.verification)}</span>
     </div>
     <div class="activity-stats">
-      <div><span>Recorded Amount</span><strong>${escapeHtml(project.fundingNeed)}</strong></div>
+      <div><span>Recorded Amount</span><strong>${escapeHtml(getRecordedAmount(project))} <button class="edit-amount-btn" data-project-id="${escapeHtml(project.id)}">Edit</button></strong></div>
       <div><span>Stage</span><strong>${escapeHtml(project.stage)}</strong></div>
       <div><span>Funding Context</span><strong>${escapeHtml(intel.potentialFunders?.length ? "Matched OECD funder signals" : "Limited dataset coverage")}</strong></div>
     </div>
@@ -1170,7 +1216,7 @@ function renderFunderHistory() {
   const target = $("#funder-history");
   if (!target) return;
   const funded = projects.filter((project) => getReviewStatus(project) === "Funded");
-  const recordedFunding = funded.reduce((sum, project) => sum + fundingAmountValue(project.fundingNeed), 0);
+  const recordedFunding = funded.reduce((sum, project) => sum + fundingAmountValue(getRecordedAmount(project)), 0);
   const activePipeline = projects.filter((project) => ["Shortlisted", "Evidence requested", "Invited to apply"].includes(getReviewStatus(project))).length;
   target.innerHTML = `
     ${pageHeader(
@@ -1960,6 +2006,7 @@ document.addEventListener("click", (event) => {
     localStorage.removeItem(STORAGE_KEYS.reviewStatuses);
     localStorage.removeItem(STORAGE_KEYS.builderActivity);
     localStorage.removeItem(STORAGE_KEYS.messages);
+    localStorage.removeItem(STORAGE_KEYS.recordedAmounts);
     window.location.reload();
     return;
   }
@@ -2033,17 +2080,26 @@ document.addEventListener("click", (event) => {
   const reviewAction = event.target.closest(".review-action");
   if (reviewAction) {
     const project = getProject();
+    if (reviewAction.dataset.action === "funded") {
+      showFundModal(project);
+      return;
+    }
     const messages = {
       shortlist: ["Shortlisted", "Project added to shortlist."],
       evidence: ["Evidence requested", "Evidence request marked."],
       invite: ["Invited to apply", "Project marked as invited to apply."],
-      funded: ["Funded", "Funding recorded in funder history."],
     };
     const [status, message] = messages[reviewAction.dataset.action] || messages.shortlist;
     project.reviewStatus = status;
     state.reviewMessage = message;
     saveReviewStatuses();
     renderDetail();
+  }
+
+  const editAmountBtn = event.target.closest(".edit-amount-btn");
+  if (editAmountBtn) {
+    const project = projects.find((p) => p.id === editAmountBtn.dataset.projectId);
+    if (project) showFundModal(project, true);
   }
 });
 
