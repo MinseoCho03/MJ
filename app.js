@@ -104,7 +104,7 @@ const manualRegion = [
 ];
 
 const state = {
-  page: "overview",
+  page: window.__INITIAL_PAGE__ || "overview",
   selectedProjectId: "offline-learning-ghana",
   builderProfile: null,
   reviewMessage: "",
