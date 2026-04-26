@@ -1506,8 +1506,8 @@ function getIntel(projectId) {
   };
 }
 
-function renderProfileField(label, value) {
-  return `<div class="field"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+function renderProfileField(label, value, wide = false) {
+  return `<div class="field${wide ? " full" : ""}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || "—")}</strong></div>`;
 }
 
 function renderList(items) {
@@ -1965,15 +1965,15 @@ function renderSubmit() {
           <label>Sector<input name="sector" required placeholder="Education" /></label>
           <label>Subsector<input name="subsector" placeholder="Tutoring access / public learning spaces" /></label>
           <label>Current Stage<select name="stage"><option>Idea</option><option>Prototype</option><option>Pilot-ready</option><option>Active users</option></select></label>
-          <label class="wide">Project Description<textarea name="description" required placeholder="Student volunteers are mapping local tutoring availability and matching learners to low-cost sessions in public libraries."></textarea></label>
           <label>Target Beneficiaries<input name="beneficiaries" required placeholder="Public school students" /></label>
           <label>Funding Need<input name="funding" required placeholder="$12,000" /></label>
-          <label>Evidence Link, optional<input name="evidence" placeholder="https://..." /><small>Demo, photos, website, GitHub, pitch deck, field report, or other proof.</small></label>
           <label>Pilot partner or local partner<input name="pilotPartner" placeholder="School, clinic, NGO, community group" /></label>
           <label>Current users / beneficiaries reached<input name="usersReached" placeholder="e.g. 120 students, 3 schools, 2 workshops" /></label>
-          <label>Budget breakdown<textarea name="budgetBreakdown" placeholder="How would the requested funding be used?"></textarea><small>How would the requested funding be used?</small></label>
-          <label>Team background<textarea name="teamBackground" placeholder="Who is building this and what local experience do they have?"></textarea></label>
-          <label>Traction or evidence<textarea name="tractionEvidence" placeholder="Any users, pilots, testimonials, workshops, or early results?"></textarea><small>Any users, pilots, testimonials, workshops, or early results?</small></label>
+          <label class="wide">Evidence Link, optional<input name="evidence" placeholder="https://..." /><small>Demo, photos, website, GitHub, pitch deck, field report, or other proof.</small></label>
+          <label class="wide">Project Description<textarea name="description" required placeholder="Student volunteers are mapping local tutoring availability and matching learners to low-cost sessions in public libraries."></textarea></label>
+          <label class="wide">Budget breakdown<textarea name="budgetBreakdown" placeholder="How would the requested funding be used?"></textarea></label>
+          <label class="wide">Team background<textarea name="teamBackground" placeholder="Who is building this and what local experience do they have?"></textarea></label>
+          <label class="wide">Traction or evidence<textarea name="tractionEvidence" placeholder="Any users, pilots, testimonials, workshops, or early results?"></textarea></label>
           <label class="wide">Impact measurement plan<textarea name="impactMeasurement" placeholder="What outcome would be measured during a pilot?"></textarea></label>
         </div>
         <div class="section">
@@ -1998,13 +1998,14 @@ function renderSubmit() {
                 ${renderProfileField("Readiness", profile.readiness)}
                 ${renderProfileField("Opportunity gap", profile.opportunityGap)}
                 ${renderProfileField("Verification status", "Self-reported")}
-                ${profile.evidenceLink ? renderProfileField("Evidence link", profile.evidenceLink) : ""}
-                ${profile.pilotPartner ? renderProfileField("Pilot / local partner", profile.pilotPartner) : ""}
-                ${profile.usersReached ? renderProfileField("Current users / beneficiaries", profile.usersReached) : ""}
-                ${profile.budgetBreakdown ? renderProfileField("Budget breakdown", profile.budgetBreakdown) : ""}
-                ${profile.teamBackground ? renderProfileField("Team background", profile.teamBackground) : ""}
-                ${profile.tractionEvidence ? renderProfileField("Traction or evidence", profile.tractionEvidence) : ""}
-                ${profile.impactMeasurement ? renderProfileField("Impact measurement plan", profile.impactMeasurement) : ""}
+                ${renderProfileField("Pilot / local partner", profile.pilotPartner)}
+                ${renderProfileField("Current users / beneficiaries", profile.usersReached)}
+                ${renderProfileField("Evidence link", profile.evidenceLink)}
+                ${renderProfileField("Project description", profile.description, true)}
+                ${renderProfileField("Budget breakdown", profile.budgetBreakdown, true)}
+                ${renderProfileField("Team background", profile.teamBackground, true)}
+                ${renderProfileField("Traction or evidence", profile.tractionEvidence, true)}
+                ${renderProfileField("Impact measurement plan", profile.impactMeasurement, true)}
               </div>
               <div class="section note-panel">Your project has been converted into a self-reported opportunity profile and added to the Funder Discovery Dashboard.</div>
               <div class="section badge-row">
