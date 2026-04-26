@@ -107,6 +107,7 @@ const state = {
   page: "overview",
   selectedProjectId: "offline-learning-ghana",
   builderProfile: null,
+  reviewMessage: "",
   filters: {
     country: "All",
     sector: "All",
@@ -137,6 +138,13 @@ function gapClass(value) {
   return "green";
 }
 
+function reviewStatusClass(value) {
+  if (value === "Invited to apply") return "green";
+  if (value === "Evidence requested") return "blue";
+  if (value === "Shortlisted") return "amber";
+  return "";
+}
+
 function fitClass(value) {
   if (value === "High") return "green";
   if (value === "Medium-High") return "blue";
@@ -151,6 +159,24 @@ function truncateText(value, limit = 210) {
   const text = String(value || "").replace(/\s+/g, " ").trim();
   if (text.length <= limit) return text;
   return `${text.slice(0, limit - 1).trim()}...`;
+}
+
+function slugify(value) {
+  return String(value || "project")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 54);
+}
+
+function readinessFilterFor(label) {
+  if (label === "Pilot-ready") return "Pilot-ready";
+  if (label === "Early-stage") return "Early-stage";
+  return "Pilot-oriented";
+}
+
+function getReviewStatus(project) {
+  return project.reviewStatus || "Not reviewed";
 }
 
 function barList(items, valueKey = "count") {
@@ -206,12 +232,13 @@ function projectCard(project, featured = false) {
   return `<article class="card project-card">
     <div class="project-card-head">
       <h3>${escapeHtml(project.title)}</h3>
-      <div class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.sector)} · ${escapeHtml(project.stage)}</div>
+      <div class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.region)}</div>
+      <div class="meta">${escapeHtml(project.sector)} · ${escapeHtml(project.subsector || "General")}</div>
     </div>
     <p>${escapeHtml(project.description)}</p>
     <dl class="project-facts">
       <div><dt>Funding Need</dt><dd>${escapeHtml(project.fundingNeed)}</dd></div>
-      <div><dt>Beneficiaries</dt><dd>${escapeHtml(project.beneficiaries)}</dd></div>
+      <div><dt>Stage</dt><dd>${escapeHtml(project.stage)}</dd></div>
     </dl>
     <div class="badge-row">
       <span class="badge blue">Readiness: ${escapeHtml(project.readiness)}</span>
@@ -239,6 +266,9 @@ function pageHeader(id, title, subtitle, description = "", actions = "", portal 
 
 function renderOverview() {
   const featured = projects.slice(0, 3);
+  const countryCount = new Set(projects.map((project) => project.country)).size;
+  const highGapCount = projects.filter((project) => project.opportunityGap === "High" || project.opportunityGap === "Medium-High").length;
+  const pilotReadyCount = projects.filter((project) => project.readiness === "Pilot-ready").length;
   $("#overview").innerHTML = `
     ${pageHeader(
       "overview-title",
@@ -246,12 +276,26 @@ function renderOverview() {
       "Discover overlooked young builders through their projects.",
       "Opportunity Atlas turns self-reported local projects into structured, funder-readable opportunity profiles, helping opportunity providers discover young builders beyond traditional credentials and networks.",
     )}
+    <section class="portal-cards">
+      <article class="card portal-card primary">
+        <span>For Funders</span>
+        <h2>Discover overlooked young builders</h2>
+        <p>Browse self-reported local projects, review structured evaluation packets, compare readiness, and identify opportunity gaps.</p>
+        <button class="btn primary route-btn" data-page="discovery">Enter Funder Dashboard</button>
+      </article>
+      <article class="card portal-card">
+        <span>For Builders</span>
+        <h2>Submit your project</h2>
+        <p>Turn your informal project into a structured opportunity profile that funders can review.</p>
+        <button class="btn route-btn" data-page="submit">Submit a Project</button>
+      </article>
+    </section>
     ${funderWorkflow("discover")}
     <section class="grid four">
-      ${kpi("Submitted Projects", "24")}
-      ${kpi("Countries Represented", "9")}
-      ${kpi("High Gap Projects", "7")}
-      ${kpi("Pilot-Ready Projects", "5")}
+      ${kpi("Submitted Projects", projects.length)}
+      ${kpi("Countries Represented", countryCount)}
+      ${kpi("High Gap Projects", highGapCount)}
+      ${kpi("Pilot-Ready Projects", pilotReadyCount)}
     </section>
     <section class="section grid two">
       <article class="card chart-card">
@@ -341,6 +385,9 @@ function renderProfileField(label, value) {
 }
 
 function renderSimilarTable(records) {
+  if (!records.length) {
+    return `<div class="empty">No similar OECD-funded projects are available for this submitted project yet.</div>`;
+  }
   const rows = records.slice(0, 6).map(
     (record) => `<tr>
       <td><strong>${escapeHtml(record.title)}</strong><br><span class="meta">${escapeHtml(truncateText(record.description || "No project description available."))}</span></td>
@@ -396,6 +443,7 @@ function renderDetail() {
   const intel = getIntel(project.id);
   const gap = intel.gapSignal || {};
   const gapLabel = project.opportunityGap;
+  const reviewStatus = getReviewStatus(project);
   $("#detail").innerHTML = `
     ${pageHeader(
       "detail-title",
@@ -405,11 +453,13 @@ function renderDetail() {
       `<span class="badge green">Verification: ${escapeHtml(project.verification)}</span>
        <span class="badge blue">Readiness: ${escapeHtml(project.readiness)}</span>
        <span class="badge ${gapClass(project.opportunityGap)}">Opportunity Gap: ${escapeHtml(project.opportunityGap)}</span>
-       <button class="btn">Shortlist</button>
-       <button class="btn">Request Evidence</button>
-       <button class="btn primary">Invite to Apply</button>`,
+       <span class="badge ${reviewStatusClass(reviewStatus)}">Current Review Status: ${escapeHtml(reviewStatus)}</span>
+       <button class="btn review-action" data-action="shortlist">Shortlist</button>
+       <button class="btn review-action" data-action="evidence">Request Evidence</button>
+       <button class="btn primary review-action" data-action="invite">Invite to Apply</button>`,
     )}
     ${funderWorkflow("review")}
+    ${state.reviewMessage ? `<div class="toast">${escapeHtml(state.reviewMessage)}</div>` : ""}
     <section class="packet-strip">
       <article><span>Packet Type</span><strong>Funder Review</strong></article>
       <article><span>Primary Need</span><strong>${escapeHtml(project.fundingNeed)} pilot grant</strong></article>
@@ -430,6 +480,7 @@ function renderDetail() {
           ${renderProfileField("Funding Need", `${project.fundingNeed} pilot grant`)}
           ${renderProfileField("Verification", project.verification)}
         </div>
+        <div class="section note-panel"><strong>Verification status: Self-reported.</strong></div>
       </article>
       <article class="card">
         ${sectionHeader("Readiness & Risks", "Readiness is separate from funder relevance.")}
@@ -453,6 +504,16 @@ function renderDetail() {
               <li>Impact measurement plan needed</li>
             </ul>
           </div>
+        </div>
+        <div class="section">
+          <h3>Recommended review questions</h3>
+          <ol>
+            <li>Can the builder provide a demo or screenshots?</li>
+            <li>Is there a letter from a pilot partner?</li>
+            <li>What is the budget breakdown?</li>
+            <li>How many users or beneficiaries will be reached?</li>
+            <li>What outcome will be measured?</li>
+          </ol>
         </div>
       </article>
     </section>
@@ -483,7 +544,7 @@ function renderDetail() {
     </section>
 
     <section class="section card">
-      ${sectionHeader("Opportunity Gap Signal", "Funding-pattern context for responsible investigation.")}
+      ${sectionHeader("Opportunity Gap", "Funding-pattern context for responsible investigation.")}
       <div class="badge-row">
         <span class="badge ${gapClass(gapLabel)}">Opportunity Gap: ${escapeHtml(gapLabel)}</span>
         <span class="badge blue">Country-sector funding: ${escapeHtml(gap.countrySectorAmountLabel || "Needs review")}</span>
@@ -495,31 +556,15 @@ function renderDetail() {
         <li>${escapeHtml(project.country)} receives less targeted local funding than broader global activity in this theme.</li>
         <li>A local project signal exists in this underrepresented space.</li>
       </ul>
-      <p class="lead section">This may be an overlooked opportunity for funders to investigate, not a guaranteed investment.</p>
+      <h3 class="section">Interpretation</h3>
+      <p class="lead">This may be an overlooked opportunity for funders to investigate, not a guaranteed investment.</p>
       <div class="note-panel"><strong>Underfunding is a signal, not a conclusion.</strong></div>
-    </section>
-
-    <section class="section act-panel">
-      <div>
-        ${sectionHeader("Act", "Use review actions only after checking evidence needs and funding context.")}
-        <ol>
-          <li>Can the builder provide a demo or screenshots?</li>
-          <li>Is there a letter from one pilot school?</li>
-          <li>What is the 3-month pilot budget?</li>
-          <li>How many students will be reached?</li>
-          <li>What outcome will be measured?</li>
-        </ol>
-      </div>
-      <div class="act-actions">
-        <button class="btn">Shortlist</button>
-        <button class="btn">Request Evidence</button>
-        <button class="btn primary">Invite to Apply</button>
-      </div>
     </section>
   `;
 }
 
 function renderSubmit() {
+  const profile = state.builderProfile;
   $("#submit").innerHTML = `
     ${pageHeader(
       "submit-title",
@@ -529,39 +574,26 @@ function renderSubmit() {
       "",
       "Builder Portal",
     )}
-    <section class="builder-shell">
+    <section class="builder-submit-grid">
       <form id="project-form" class="card">
         <div class="form-grid">
           <label>Project Title<input name="title" required value="Community tutoring map for public libraries" /></label>
           <label>Country<input name="country" required value="Colombia" /></label>
           <label>Region<input name="region" required value="Latin America" /></label>
           <label>Sector<input name="sector" required value="Education" /></label>
+          <label>Subsector<input name="subsector" value="Tutoring access / public learning spaces" /></label>
+          <label>Current Stage<select name="stage"><option>Idea</option><option selected>Prototype</option><option>Pilot-ready</option><option>Active users</option></select></label>
           <label class="wide">Project Description<textarea name="description" required>Student volunteers are mapping local tutoring availability and matching learners to low-cost sessions in public libraries.</textarea></label>
           <label>Target Beneficiaries<input name="beneficiaries" required value="Public school students" /></label>
-          <label>Current Stage<input name="stage" required value="Prototype" /></label>
           <label>Funding Need<input name="funding" required value="$12,000" /></label>
+          <label>Readiness<select name="readiness"><option>Early-stage</option><option selected>Pilot-oriented prototype</option><option>Pilot-ready</option></select></label>
+          <label>Opportunity Gap<select name="gap"><option>Low</option><option>Medium</option><option selected>Medium-High</option><option>High</option></select></label>
           <label>Evidence Link, optional<input name="evidence" placeholder="https://..." /></label>
         </div>
         <div class="section">
           <button class="btn primary" type="submit">Generate Opportunity Profile</button>
         </div>
       </form>
-    </section>
-  `;
-}
-
-function renderBuilderPreview() {
-  const profile = state.builderProfile;
-  $("#builder-preview").innerHTML = `
-    ${pageHeader(
-      "builder-preview-title",
-      "Structured Profile Preview",
-      "Preview how a self-reported project appears to funders.",
-      "",
-      "",
-      "Builder Portal",
-    )}
-    <section class="builder-shell">
       <article id="profile-preview" class="card">
         ${sectionHeader("Self-Reported Opportunity Profile", "This preview is structured for funder review.")}
         ${
@@ -571,12 +603,19 @@ function renderBuilderPreview() {
                 ${renderProfileField("Country", profile.country)}
                 ${renderProfileField("Region", profile.region)}
                 ${renderProfileField("Sector", profile.sector)}
+                ${renderProfileField("Subsector", profile.subsector)}
                 ${renderProfileField("Beneficiaries", profile.beneficiaries)}
                 ${renderProfileField("Stage", profile.stage)}
-                ${renderProfileField("Funding need", profile.funding)}
+                ${renderProfileField("Funding need", profile.fundingNeed)}
+                ${renderProfileField("Readiness", profile.readiness)}
+                ${renderProfileField("Opportunity gap", profile.opportunityGap)}
                 ${renderProfileField("Verification status", "Self-reported")}
               </div>
-              <div class="section note-panel">Your project has been converted into a structured opportunity profile. In this MVP, all submissions are self-reported and not independently verified.</div>`
+              <div class="section note-panel">Your project has been converted into a self-reported opportunity profile and added to the Funder Discovery Dashboard.</div>
+              <div class="section badge-row">
+                <button class="btn route-btn" data-page="discovery" data-reset-filters="true">View in Funder Dashboard</button>
+                <button class="btn primary packet-btn" data-project-id="${escapeHtml(profile.id)}">View Evaluation Packet</button>
+              </div>`
             : `<div class="empty">Submit a project to generate a structured funder-readable preview.</div>`
         }
       </article>
@@ -625,7 +664,7 @@ function renderSignals() {
       </article>
     </section>
     <section class="section note-panel">
-      <strong>OECD data is not used as talent data.</strong> It is used as funding intelligence to understand historical funding patterns, similar funded projects, and funder relevance.
+      <strong>OECD data is used as funding intelligence, not talent data.</strong> It helps funders understand historical philanthropy funding patterns, similar funded projects, and funder relevance.
     </section>
   `;
 }
@@ -636,7 +675,6 @@ function renderCurrentPage() {
   renderDetail();
   renderSignals();
   renderSubmit();
-  renderBuilderPreview();
   document.querySelectorAll(".page").forEach((page) => page.classList.toggle("active", page.id === state.page));
   document.querySelectorAll(".nav-link").forEach((link) => link.classList.toggle("active", link.dataset.page === state.page));
 }
@@ -654,10 +692,42 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const route = event.target.closest(".route-btn");
+  if (route) {
+    if (route.dataset.resetFilters === "true") {
+      Object.assign(state.filters, {
+        country: "All",
+        sector: "All",
+        stage: "All",
+        readiness: "All",
+        gap: "All",
+        verification: "Self-reported",
+      });
+    }
+    goTo(route.dataset.page);
+    return;
+  }
+
   const packet = event.target.closest(".packet-btn");
   if (packet) {
     state.selectedProjectId = packet.dataset.projectId;
+    state.reviewMessage = "";
     goTo("detail");
+    return;
+  }
+
+  const reviewAction = event.target.closest(".review-action");
+  if (reviewAction) {
+    const project = getProject();
+    const messages = {
+      shortlist: ["Shortlisted", "Project added to shortlist."],
+      evidence: ["Evidence requested", "Evidence request marked."],
+      invite: ["Invited to apply", "Project marked as invited to apply."],
+    };
+    const [status, message] = messages[reviewAction.dataset.action] || messages.shortlist;
+    project.reviewStatus = status;
+    state.reviewMessage = message;
+    renderDetail();
   }
 });
 
@@ -672,16 +742,29 @@ document.addEventListener("submit", (event) => {
   if (event.target.id !== "project-form") return;
   event.preventDefault();
   const form = new FormData(event.target);
-  state.builderProfile = {
+  const title = form.get("title");
+  const newProject = {
+    id: `${slugify(title)}-${Date.now().toString(36)}`,
     title: form.get("title"),
     country: form.get("country"),
     region: form.get("region"),
     sector: form.get("sector"),
+    subsector: form.get("subsector") || "General",
     beneficiaries: form.get("beneficiaries"),
     stage: form.get("stage"),
-    funding: form.get("funding"),
+    fundingNeed: form.get("funding"),
+    readiness: form.get("readiness"),
+    readinessFilter: readinessFilterFor(form.get("readiness")),
+    opportunityGap: form.get("gap"),
+    verification: "Self-reported",
+    description: form.get("description"),
+    reviewStatus: "Not reviewed",
   };
-  goTo("builder-preview");
+  projects.push(newProject);
+  state.builderProfile = newProject;
+  state.selectedProjectId = newProject.id;
+  state.reviewMessage = "";
+  renderSubmit();
 });
 
 renderCurrentPage();

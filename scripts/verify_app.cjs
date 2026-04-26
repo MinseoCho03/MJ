@@ -33,14 +33,22 @@ async function main() {
   const fundingContext = await page.locator("#detail").getByRole("heading", { name: "Funding Context" }).textContent();
   const similarNote = await page.locator("#detail").getByText("Similar funded projects indicate funder relevance").textContent();
   const gapLabel = await page.locator("#detail .badge").filter({ hasText: "Medium-High" }).first().textContent();
+  await page.locator("#detail").getByRole("button", { name: "Shortlist" }).first().click();
+  const reviewToast = await page.locator("#detail .toast").textContent();
+  const reviewStatus = await page.locator("#detail .badge").filter({ hasText: "Current Review Status" }).first().textContent();
 
   await page.getByRole("button", { name: "Funding Signals" }).click();
   const totalFunding = await page.locator("#signals .kpi strong").first().textContent();
 
   await page.getByRole("button", { name: "Submit Project" }).click();
   await page.getByRole("button", { name: "Generate Opportunity Profile" }).click();
-  const previewTitle = await page.locator("#builder-preview-title").textContent();
-  const previewText = await page.locator("#builder-preview").getByText("Your project has been converted").textContent();
+  const previewTitle = await page.locator("#profile-preview").getByRole("heading", { name: "Self-Reported Opportunity Profile" }).textContent();
+  const previewText = await page.locator("#submit").getByText("Your project has been converted").textContent();
+  await page.locator("#submit").getByRole("button", { name: "View in Funder Dashboard" }).click();
+  const submittedProjectVisible = await page.getByText("Community tutoring map for public libraries").first().isVisible();
+  await page.getByRole("button", { name: "Submit Project" }).click();
+  await page.locator("#submit").getByRole("button", { name: "View Evaluation Packet" }).click();
+  const submittedDetailTitle = await page.locator("#detail-title").textContent();
 
   await page.screenshot({ path: path.join(root, "opportunity-atlas-smoke.png"), fullPage: true });
   await browser.close();
@@ -55,9 +63,13 @@ async function main() {
         fundingContext,
         similarNote,
         gapLabel,
+        reviewToast,
+        reviewStatus,
         totalFunding,
         previewTitle,
         previewText,
+        submittedProjectVisible,
+        submittedDetailTitle,
         errors,
       },
       null,
@@ -65,7 +77,7 @@ async function main() {
     ),
   );
 
-  if (errors.length || overviewTitle !== "Opportunity Atlas" || ghanaCards < 1 || !totalFunding) {
+  if (errors.length || overviewTitle !== "Opportunity Atlas" || ghanaCards < 1 || !totalFunding || !submittedProjectVisible) {
     process.exitCode = 1;
   }
 }
