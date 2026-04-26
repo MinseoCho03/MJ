@@ -6,7 +6,7 @@
     <title>Opportunity Atlas — Builder Portal</title>
     <link rel="stylesheet" href="../styles.css" />
   </head>
-  <body>
+  <body data-portal="builder">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">OA</div>
@@ -32,6 +32,9 @@
     </aside>
 
     <main class="app-shell">
+      <div class="top-tabs" aria-label="Quick tabs">
+        <button class="top-tab route-btn" data-page="messages" type="button">Messages</button>
+      </div>
       <section id="overview" class="page" aria-labelledby="overview-title"></section>
       <section id="discovery" class="page" aria-labelledby="discovery-title"></section>
       <section id="detail" class="page" aria-labelledby="detail-title"></section>
@@ -40,6 +43,7 @@
       <section id="submit" class="page active" aria-labelledby="submit-title"></section>
       <section id="builder-history" class="page" aria-labelledby="builder-history-title"></section>
       <section id="builder-notifications" class="page" aria-labelledby="builder-notifications-title"></section>
+      <section id="messages" class="page" aria-labelledby="messages-title"></section>
     </main>
 
     <script src="../data/oecd-data.js"></script>
