@@ -75,6 +75,43 @@ textarea {
   font-weight: 800;
 }
 
+.account-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2366c9, #0d846a);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.account-info strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f7fbff;
+}
+
+.account-info span {
+  display: block;
+  font-size: 11px;
+  color: #8fb0ce;
+  margin-top: 1px;
+}
+
 .brand span,
 .sidebar-note p {
   display: block;
@@ -463,6 +500,9 @@ label small {
 .queue-list {
   display: grid;
   gap: 12px;
+  max-height: 460px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .queue-card {

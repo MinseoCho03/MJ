@@ -1,5 +1,12 @@
 const oecd = window.OECD_DATA || {};
 
+const FUNDER_ACCOUNT = {
+  name: "Gates Foundation",
+  initials: "GF",
+  focus: ["Health", "Education", "Agriculture", "Climate"],
+  description: "Global Health · Education · Agricultural Development",
+};
+
 const projects = [
   {
     id: "offline-learning-ghana",
@@ -121,6 +128,122 @@ const manualRegion = [
   { label: "South Asia", count: 6 },
   { label: "East Africa", count: 5 },
   { label: "Latin America", count: 5 },
+];
+
+const gfFundedProjects = [
+  // Health – Malaria
+  {id:"gf-001",title:"Malaria Vector Control Scale-up Programme",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Kenya Medical Research Institute",year:2023,amount:4.2},
+  {id:"gf-002",title:"Indoor Residual Spraying for Malaria Reduction",country:"Tanzania",region:"Eastern Africa",sector:"Health",recipient:"National Malaria Control Programme TZ",year:2022,amount:3.8},
+  {id:"gf-003",title:"Malaria Vaccine Rollout Support",country:"Uganda",region:"Eastern Africa",sector:"Health",recipient:"Uganda National Expanded Programme on Immunisation",year:2023,amount:5.1},
+  {id:"gf-004",title:"Integrated Malaria Case Management",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Society for Family Health Nigeria",year:2022,amount:7.3},
+  {id:"gf-005",title:"Long-Lasting Insecticidal Net Distribution",country:"Ghana",region:"Western Africa",sector:"Health",recipient:"Ghana Health Service",year:2023,amount:2.9},
+  {id:"gf-006",title:"Malaria Elimination Pilot Programme",country:"Mozambique",region:"Eastern Africa",sector:"Health",recipient:"National Malaria Control Programme MZ",year:2022,amount:6.4},
+  {id:"gf-007",title:"Malaria Surveillance and Rapid Response",country:"DRC",region:"Central Africa",sector:"Health",recipient:"Institut National de Santé Publique",year:2021,amount:4.8},
+  {id:"gf-008",title:"Seasonal Malaria Chemoprevention",country:"Mali",region:"Western Africa",sector:"Health",recipient:"Direction Nationale de la Santé",year:2023,amount:3.1},
+  // Health – Maternal & Child Health
+  {id:"gf-009",title:"Maternal Health System Strengthening",country:"India",region:"South Asia",sector:"Health",recipient:"Population Foundation of India",year:2023,amount:9.7},
+  {id:"gf-010",title:"Skilled Birth Attendant Training Programme",country:"Bangladesh",region:"South Asia",sector:"Health",recipient:"BRAC Health Programme",year:2023,amount:6.2},
+  {id:"gf-011",title:"Postnatal Care Quality Improvement",country:"Ethiopia",region:"Eastern Africa",sector:"Health",recipient:"Ethiopian Public Health Institute",year:2022,amount:4.5},
+  {id:"gf-012",title:"Newborn Survival Programme",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Maternal Newborn and Child Health Initiative",year:2023,amount:8.1},
+  {id:"gf-013",title:"Community Midwifery Scale-up",country:"Pakistan",region:"South Asia",sector:"Health",recipient:"Aga Khan Development Network",year:2022,amount:3.7},
+  {id:"gf-014",title:"Maternal Mortality Reduction Initiative",country:"Myanmar",region:"South-East Asia",sector:"Health",recipient:"Myanmar Maternal and Child Welfare Association",year:2021,amount:2.8},
+  {id:"gf-015",title:"Prenatal Nutrition Programme",country:"Nepal",region:"South Asia",sector:"Health",recipient:"Nepal Family Health Programme",year:2023,amount:2.1},
+  {id:"gf-016",title:"Emergency Obstetric Care Access",country:"Uganda",region:"Eastern Africa",sector:"Health",recipient:"Marie Stopes International Uganda",year:2022,amount:3.4},
+  {id:"gf-017",title:"Maternal Death Surveillance System",country:"Tanzania",region:"Eastern Africa",sector:"Health",recipient:"Ifakara Health Institute",year:2023,amount:1.9},
+  {id:"gf-018",title:"Obstetric Fistula Repair Programme",country:"Senegal",region:"Western Africa",sector:"Health",recipient:"Fistula Foundation",year:2021,amount:1.4},
+  // Health – Vaccines
+  {id:"gf-019",title:"Childhood Immunisation Scale-up",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Aliko Dangote Foundation",year:2023,amount:11.2},
+  {id:"gf-020",title:"Rotavirus Vaccine Introduction Support",country:"India",region:"South Asia",sector:"Health",recipient:"UNICEF India",year:2022,amount:8.4},
+  {id:"gf-021",title:"Polio Eradication Programme",country:"DRC",region:"Central Africa",sector:"Health",recipient:"WHO DRC Office",year:2023,amount:6.7},
+  {id:"gf-022",title:"Measles Elimination Campaign",country:"Pakistan",region:"South Asia",sector:"Health",recipient:"Expanded Programme on Immunisation Pakistan",year:2022,amount:5.3},
+  {id:"gf-023",title:"HPV Vaccine Pilot Programme",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Kenya National Vaccines & Immunisation Programme",year:2023,amount:2.6},
+  {id:"gf-024",title:"Pneumococcal Vaccine Rollout",country:"Bangladesh",region:"South Asia",sector:"Health",recipient:"icddr,b",year:2022,amount:3.9},
+  {id:"gf-025",title:"Cold Chain Infrastructure Strengthening",country:"Ethiopia",region:"Eastern Africa",sector:"Health",recipient:"Ethiopian Federal Ministry of Health",year:2023,amount:4.2},
+  // Health – HIV / TB
+  {id:"gf-026",title:"HIV Treatment Adherence Programme",country:"South Africa",region:"Southern Africa",sector:"Health",recipient:"Treatment Action Campaign",year:2023,amount:12.4},
+  {id:"gf-027",title:"TB and HIV Co-infection Management",country:"Zimbabwe",region:"Southern Africa",sector:"Health",recipient:"Zimbabwe Association of Church-Related Hospitals",year:2022,amount:5.8},
+  {id:"gf-028",title:"HIV Prevention Community Health Workers",country:"Zambia",region:"Southern Africa",sector:"Health",recipient:"Society for Family Health Zambia",year:2023,amount:7.1},
+  {id:"gf-029",title:"Antiretroviral Therapy Access Scale-up",country:"Mozambique",region:"Eastern Africa",sector:"Health",recipient:"FHI 360 Mozambique",year:2022,amount:9.3},
+  {id:"gf-030",title:"HIV Testing and Counselling Expansion",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"AIDS Prevention Initiative Nigeria",year:2023,amount:6.5},
+  {id:"gf-031",title:"Tuberculosis Case Detection Programme",country:"Tanzania",region:"Eastern Africa",sector:"Health",recipient:"AMREF Health Africa",year:2022,amount:3.7},
+  {id:"gf-032",title:"Pediatric HIV Care and Treatment",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Kenya Paediatric Association",year:2023,amount:4.1},
+  // Health – Nutrition
+  {id:"gf-033",title:"Acute Malnutrition Treatment Programme",country:"Ethiopia",region:"Eastern Africa",sector:"Health",recipient:"Save the Children Ethiopia",year:2023,amount:5.4},
+  {id:"gf-034",title:"Community Nutrition Workers Network",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Helen Keller International Nigeria",year:2022,amount:3.8},
+  {id:"gf-035",title:"Stunting Reduction Initiative",country:"Bangladesh",region:"South Asia",sector:"Health",recipient:"International Centre for Diarrhoeal Disease Research",year:2023,amount:6.7},
+  {id:"gf-036",title:"Iron Deficiency Anaemia Programme",country:"India",region:"South Asia",sector:"Health",recipient:"Micronutrient Initiative India",year:2022,amount:4.3},
+  {id:"gf-037",title:"Child Wasting Intervention",country:"Mali",region:"Western Africa",sector:"Health",recipient:"Action Against Hunger Mali",year:2023,amount:2.9},
+  {id:"gf-038",title:"Micronutrient Supplementation Programme",country:"Mozambique",region:"Eastern Africa",sector:"Health",recipient:"Vitamin Angels",year:2022,amount:2.1},
+  // Health – Digital Health
+  {id:"gf-039",title:"Digital Community Health Worker Platform",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Living Goods Kenya",year:2023,amount:3.2},
+  {id:"gf-040",title:"mHealth Antenatal Care System",country:"Tanzania",region:"Eastern Africa",sector:"Health",recipient:"D-tree International",year:2022,amount:2.7},
+  {id:"gf-041",title:"Telemedicine Rural Access Programme",country:"India",region:"South Asia",sector:"Health",recipient:"Swasth Foundation",year:2023,amount:5.1},
+  {id:"gf-042",title:"Community Health Worker Digital Tool",country:"Indonesia",region:"South-East Asia",sector:"Health",recipient:"Yayasan Kusuma Buana",year:2023,amount:2.2},
+  {id:"gf-043",title:"Electronic Health Records for Primary Care",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"eHealth Africa",year:2022,amount:4.6},
+  {id:"gf-044",title:"Maternal Health Data System",country:"Bangladesh",region:"South Asia",sector:"Health",recipient:"Dhaka Community Hospital Trust",year:2023,amount:3.1},
+  {id:"gf-045",title:"Digital Disease Surveillance Network",country:"Rwanda",region:"Eastern Africa",sector:"Health",recipient:"Rwanda Biomedical Centre",year:2022,amount:1.8},
+  // Agriculture – Smallholder Farmers
+  {id:"gf-046",title:"Climate-Smart Agriculture Scale-up",country:"Kenya",region:"Eastern Africa",sector:"Agriculture",recipient:"One Acre Fund Kenya",year:2023,amount:2.4},
+  {id:"gf-047",title:"Smallholder Market Access Programme",country:"Tanzania",region:"Eastern Africa",sector:"Agriculture",recipient:"Kilimo Trust",year:2022,amount:3.1},
+  {id:"gf-048",title:"Drought-Tolerant Maize Varieties",country:"Ethiopia",region:"Eastern Africa",sector:"Agriculture",recipient:"CIMMYT Ethiopia",year:2023,amount:4.7},
+  {id:"gf-049",title:"Fertiliser Access for Smallholders",country:"Nigeria",region:"Western Africa",sector:"Agriculture",recipient:"Alliance for a Green Revolution in Africa",year:2022,amount:5.2},
+  {id:"gf-050",title:"Maize Yield Improvement Programme",country:"Ghana",region:"Western Africa",sector:"Agriculture",recipient:"International Food Policy Research Institute",year:2023,amount:2.8},
+  {id:"gf-051",title:"Coffee Value Chain Development",country:"Uganda",region:"Eastern Africa",sector:"Agriculture",recipient:"TechnoServe Uganda",year:2022,amount:1.9},
+  {id:"gf-052",title:"Conservation Agriculture Scale-up",country:"Zambia",region:"Southern Africa",sector:"Agriculture",recipient:"Conservation Farming Unit",year:2023,amount:2.3},
+  {id:"gf-053",title:"Millet and Sorghum Productivity",country:"Mali",region:"Western Africa",sector:"Agriculture",recipient:"ICRISAT Mali",year:2022,amount:1.6},
+  {id:"gf-054",title:"Soil Fertility Management Initiative",country:"Burkina Faso",region:"Western Africa",sector:"Agriculture",recipient:"INERA Burkina Faso",year:2023,amount:1.4},
+  {id:"gf-055",title:"Food Systems Resilience Programme",country:"Niger",region:"Western Africa",sector:"Agriculture",recipient:"Catholic Relief Services Niger",year:2022,amount:1.8},
+  {id:"gf-056",title:"Potato Value Chain Strengthening",country:"Rwanda",region:"Eastern Africa",sector:"Agriculture",recipient:"International Potato Centre",year:2023,amount:2.1},
+  {id:"gf-057",title:"Rice Yield Improvement Programme",country:"Mozambique",region:"Eastern Africa",sector:"Agriculture",recipient:"Africa Rice Centre",year:2022,amount:2.6},
+  // Agriculture – Finance & Tools
+  {id:"gf-058",title:"Digital Agricultural Finance Platform",country:"Kenya",region:"Eastern Africa",sector:"Agriculture",recipient:"Equity Bank Foundation Kenya",year:2023,amount:3.4},
+  {id:"gf-059",title:"Crop Insurance Pilot for Smallholders",country:"Tanzania",region:"Eastern Africa",sector:"Agriculture",recipient:"Agriculture Development Fund TZ",year:2022,amount:2.2},
+  {id:"gf-060",title:"Agri-Input Voucher System",country:"Ghana",region:"Western Africa",sector:"Agriculture",recipient:"Esoko Networks",year:2023,amount:1.7},
+  {id:"gf-061",title:"Precision Irrigation for Smallholders",country:"India",region:"South Asia",sector:"Agriculture",recipient:"International Water Management Institute",year:2022,amount:4.8},
+  {id:"gf-062",title:"Flood-Tolerant Rice Varieties",country:"Bangladesh",region:"South Asia",sector:"Agriculture",recipient:"Bangladesh Rice Research Institute",year:2023,amount:3.3},
+  {id:"gf-063",title:"Hill Farming Support Programme",country:"Nepal",region:"South Asia",sector:"Agriculture",recipient:"CARE Nepal",year:2022,amount:1.2},
+  {id:"gf-064",title:"Drip Irrigation Expansion",country:"Pakistan",region:"South Asia",sector:"Agriculture",recipient:"Pakistan Agricultural Research Council",year:2023,amount:2.9},
+  // Water & Sanitation
+  {id:"gf-065",title:"Community Water Quality Reporting",country:"Nigeria",region:"Western Africa",sector:"Water & Sanitation",recipient:"WaterAid Nigeria",year:2023,amount:3.3},
+  {id:"gf-066",title:"Rural Water Supply Infrastructure",country:"Kenya",region:"Eastern Africa",sector:"Water & Sanitation",recipient:"Water & Sanitation for the Urban Poor",year:2022,amount:2.8},
+  {id:"gf-067",title:"Water Point Management Systems",country:"Uganda",region:"Eastern Africa",sector:"Water & Sanitation",recipient:"IRC Uganda",year:2023,amount:1.9},
+  {id:"gf-068",title:"School WASH Programme",country:"Tanzania",region:"Eastern Africa",sector:"Water & Sanitation",recipient:"UNICEF Tanzania",year:2022,amount:2.4},
+  {id:"gf-069",title:"Open Defecation Free Campaign",country:"India",region:"South Asia",sector:"Water & Sanitation",recipient:"Gram Vikas India",year:2023,amount:5.6},
+  {id:"gf-070",title:"Arsenic-Safe Water Systems",country:"Bangladesh",region:"South Asia",sector:"Water & Sanitation",recipient:"BRAC WASH Programme",year:2022,amount:3.1},
+  {id:"gf-071",title:"WASH Governance Strengthening",country:"Ethiopia",region:"Eastern Africa",sector:"Water & Sanitation",recipient:"WaterAid Ethiopia",year:2023,amount:2.2},
+  {id:"gf-072",title:"Rural Water Systems Maintenance",country:"Mali",region:"Western Africa",sector:"Water & Sanitation",recipient:"HELVETAS Mali",year:2022,amount:1.4},
+  {id:"gf-073",title:"Emergency Water Access Programme",country:"DRC",region:"Central Africa",sector:"Water & Sanitation",recipient:"Mercy Corps DRC",year:2023,amount:2.7},
+  {id:"gf-074",title:"Sanitation Infrastructure Programme",country:"Mozambique",region:"Eastern Africa",sector:"Water & Sanitation",recipient:"Plan International Mozambique",year:2022,amount:1.8},
+  // Education
+  {id:"gf-075",title:"Girls Secondary Education Access",country:"Kenya",region:"Eastern Africa",sector:"Education",recipient:"Camfed Kenya",year:2023,amount:4.2},
+  {id:"gf-076",title:"Teacher Professional Development",country:"Ghana",region:"Western Africa",sector:"Education",recipient:"Ghana Education Service",year:2022,amount:3.1},
+  {id:"gf-077",title:"Early Childhood Development Programme",country:"Nigeria",region:"Western Africa",sector:"Education",recipient:"Education as a Vaccine",year:2023,amount:5.7},
+  {id:"gf-078",title:"Numeracy and Literacy Improvement",country:"Tanzania",region:"Eastern Africa",sector:"Education",recipient:"Twaweza Tanzania",year:2022,amount:2.9},
+  {id:"gf-079",title:"School Feeding and Nutrition",country:"Ethiopia",region:"Eastern Africa",sector:"Education",recipient:"World Food Programme Ethiopia",year:2023,amount:3.4},
+  {id:"gf-080",title:"Digital Learning Platforms for Rural Schools",country:"India",region:"South Asia",sector:"Education",recipient:"Pratham Education Foundation",year:2022,amount:4.1},
+  {id:"gf-081",title:"Higher Education Scholarship Programme",country:"Rwanda",region:"Eastern Africa",sector:"Education",recipient:"Rwanda Education Board",year:2023,amount:2.3},
+  {id:"gf-082",title:"Girls Dropout Prevention Programme",country:"Bangladesh",region:"South Asia",sector:"Education",recipient:"BRAC Education Programme",year:2022,amount:3.8},
+  // Financial Inclusion
+  {id:"gf-083",title:"Mobile Money for Smallholder Farmers",country:"Kenya",region:"Eastern Africa",sector:"Financial Inclusion",recipient:"M-PESA Foundation",year:2023,amount:2.1},
+  {id:"gf-084",title:"Village Savings and Loan Groups",country:"Tanzania",region:"Eastern Africa",sector:"Financial Inclusion",recipient:"Opportunity International Tanzania",year:2022,amount:1.6},
+  {id:"gf-085",title:"Mobile Banking Infrastructure",country:"Ghana",region:"Western Africa",sector:"Financial Inclusion",recipient:"Ghana Interbank Payment Systems",year:2023,amount:2.7},
+  {id:"gf-086",title:"Microfinance Institution Support",country:"Nigeria",region:"Western Africa",sector:"Financial Inclusion",recipient:"LAPO Microfinance Bank",year:2022,amount:3.9},
+  {id:"gf-087",title:"Women's Financial Inclusion Programme",country:"India",region:"South Asia",sector:"Financial Inclusion",recipient:"Self Employed Women's Association",year:2023,amount:5.2},
+  {id:"gf-088",title:"Digital Payments Infrastructure",country:"Bangladesh",region:"South Asia",sector:"Financial Inclusion",recipient:"bKash Foundation",year:2022,amount:3.4},
+  {id:"gf-089",title:"Rural Banking Access",country:"Nepal",region:"South Asia",sector:"Financial Inclusion",recipient:"Nirdhan Utthan Bank",year:2023,amount:1.3},
+  {id:"gf-090",title:"Savings Groups for Women",country:"Uganda",region:"Eastern Africa",sector:"Financial Inclusion",recipient:"Plan International Uganda",year:2022,amount:1.8},
+  // Population & Reproductive Health
+  {id:"gf-091",title:"Family Planning Community Health Workers",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Marie Stopes International Kenya",year:2023,amount:3.7},
+  {id:"gf-092",title:"Contraceptive Access Programme",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Society for Family Health Nigeria",year:2022,amount:5.1},
+  {id:"gf-093",title:"Adolescent Reproductive Health Initiative",country:"Ethiopia",region:"Eastern Africa",sector:"Health",recipient:"Ethiopian Women Lawyers Association",year:2023,amount:2.8},
+  {id:"gf-094",title:"Maternal Family Planning Integration",country:"Tanzania",region:"Eastern Africa",sector:"Health",recipient:"Tanzania Midwives Association",year:2022,amount:2.4},
+  {id:"gf-095",title:"Sexual and Reproductive Health Services",country:"Senegal",region:"Western Africa",sector:"Health",recipient:"Association pour le Bien-être Familial",year:2023,amount:1.9},
+  {id:"gf-096",title:"Population Policy Research Support",country:"India",region:"South Asia",sector:"Health",recipient:"International Institute for Population Sciences",year:2022,amount:4.3},
+  // Emergency Response & Other
+  {id:"gf-097",title:"COVID-19 Health System Strengthening",country:"Kenya",region:"Eastern Africa",sector:"Health",recipient:"Amref Health Africa",year:2022,amount:6.8},
+  {id:"gf-098",title:"Epidemic Preparedness Programme",country:"Nigeria",region:"Western Africa",sector:"Health",recipient:"Nigeria Centre for Disease Control Foundation",year:2023,amount:4.2},
+  {id:"gf-099",title:"Cholera Response and Prevention",country:"DRC",region:"Central Africa",sector:"Health",recipient:"Médecins Sans Frontières",year:2021,amount:3.1},
+  {id:"gf-100",title:"Flood Disaster Health Response",country:"Bangladesh",region:"South Asia",sector:"Health",recipient:"Red Crescent Society Bangladesh",year:2023,amount:2.5},
 ];
 
 const STORAGE_KEYS = {
@@ -418,6 +541,26 @@ function showFundModal(project, isEdit = false) {
   });
 }
 
+function gfHistoricalAmount(projectId) {
+  const intel = getIntel(projectId);
+  const gf = (intel.potentialFunders || []).find((f) => f.name === FUNDER_ACCOUNT.name);
+  return gf ? gf.amountLabel : null;
+}
+
+function seedGatesFoundationDemo() {
+  if (localStorage.getItem(STORAGE_KEYS.reviewStatuses) !== null) return;
+  const seedIds = ["maternal-health-india", "sms-climate-kenya", "water-quality-nigeria", "telemedicine-indonesia"];
+  const statuses = {};
+  const amounts = {};
+  seedIds.forEach((id) => {
+    statuses[id] = "Funded";
+    const amt = gfHistoricalAmount(id);
+    if (amt) amounts[id] = amt;
+  });
+  storageSet(STORAGE_KEYS.reviewStatuses, statuses);
+  storageSet(STORAGE_KEYS.recordedAmounts, amounts);
+}
+
 function builderProjects() {
   return projects.filter((project) => project.isSubmitted);
 }
@@ -462,7 +605,7 @@ function funderViewerForProject(project, activity) {
   const funder = funders.length ? funders[viewCount % funders.length] : null;
   const roles = ["Program officer", "Grantmaking associate", "Fellowship scout", "Innovation fund reviewer"];
   return {
-    organization: funder?.name || "Opportunity Atlas review desk",
+    organization: funder?.name || "First Spark review desk",
     role: roles[viewCount % roles.length],
   };
 }
@@ -550,7 +693,7 @@ function ensureThread(project, initiator = currentPortalType()) {
       builderId: project.builderId,
       builderName: builderName(project),
       projectTitle: project.title,
-      funderName: getIntel(project.id).potentialFunders?.[0]?.name || "Opportunity Atlas funder",
+      funderName: FUNDER_ACCOUNT.name,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: [],
@@ -564,7 +707,7 @@ function ensureThread(project, initiator = currentPortalType()) {
       : `A funder opened a conversation with ${builderName(project)} about ${project.title}.`;
   if (!thread.messages.some((message) => message.system && message.text === starterText)) {
     thread.messages.push({
-      sender: "Opportunity Atlas",
+      sender: "First Spark",
       text: starterText,
       at: new Date().toISOString(),
       system: true,
@@ -794,6 +937,13 @@ function funderAlignmentScore(project, intel) {
   return Math.max(0, Math.min(100, Math.round(funderFit + keywordFit + sectorFit + countryFit + regionFit + matchDepth)));
 }
 
+function gatesFit(project) {
+  const sector = (project.sector || "").toLowerCase();
+  if (sector.includes("health")) return "High";
+  if (FUNDER_ACCOUNT.focus.some((f) => sector.includes(f.toLowerCase()))) return "Medium";
+  return "Low";
+}
+
 function recommendationSignal(project) {
   const intel = getIntel(project.id);
   const gapScore = opportunityGapScore(project, intel);
@@ -996,6 +1146,7 @@ function projectCard(project, featured = false) {
       <span class="badge blue">Readiness: ${escapeHtml(project.readiness)}</span>
       <span class="badge ${gapClass(project.opportunityGap)}">Opportunity Gap: ${escapeHtml(project.opportunityGap)}</span>
       <span class="badge green">Verification: ${escapeHtml(project.verification)}</span>
+      <span class="badge ${gatesFit(project) === "High" ? "green" : gatesFit(project) === "Medium" ? "blue" : ""}">GF Fit: ${escapeHtml(gatesFit(project))}</span>
     </div>
     <div class="card-footer">
       <span class="money">${featured ? "Featured gap" : "Evaluation packet"}</span>
@@ -1063,9 +1214,9 @@ function renderOverview() {
   $("#overview").innerHTML = `
     ${pageHeader(
       "overview-title",
-      "Opportunity Atlas",
-      "Discover overlooked young builders through their projects.",
-      "Opportunity Atlas turns self-reported local projects into structured, funder-readable opportunity profiles, helping opportunity providers discover young builders beyond traditional credentials and networks.",
+      "First Spark",
+      `${escapeHtml(FUNDER_ACCOUNT.name)} · ${escapeHtml(FUNDER_ACCOUNT.description)}`,
+      "First Spark turns self-reported local projects into structured, funder-readable opportunity profiles, helping opportunity providers discover young builders beyond traditional credentials and networks.",
     )}
     <section class="grid four">
       ${kpi("Submitted Projects", projects.length)}
@@ -1084,13 +1235,13 @@ function renderOverview() {
       </article>
     </section>
     <section class="section">
-      ${sectionHeader("Recommended Review Opportunities", "Ranked by opportunity gap and funder alignment signals. This is a review-priority signal, not a quality judgment.")}
+      ${sectionHeader("Recommended for " + escapeHtml(FUNDER_ACCOUNT.name), "Ranked by opportunity gap and alignment with your portfolio focus areas. This is a review-priority signal, not a quality judgment.")}
       <div class="grid three">
         ${recommendations.map(({ project, signal }) => recommendationCard(project, signal)).join("")}
       </div>
     </section>
     <section class="section note-panel">
-      <strong>Responsible recommendation boundary:</strong> Opportunity Atlas does not automatically decide who deserves funding. It helps funders discover, compare, and review overlooked local projects.
+      <strong>Responsible recommendation boundary:</strong> First Spark does not automatically decide who deserves funding. It helps funders discover, compare, and review overlooked local projects.
     </section>
   `;
 }
@@ -1143,6 +1294,40 @@ function renderDiscovery() {
   `;
 }
 
+function formatMillions(value) {
+  if (value >= 1000) return `$${(value / 1000).toFixed(1)}B`;
+  return `$${Math.round(value)}M`;
+}
+
+function gfQueueCard(project) {
+  return `<article class="queue-card">
+    <div>
+      <h3>${escapeHtml(project.title)}</h3>
+      <p class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.region)} · ${escapeHtml(project.sector)}</p>
+      <p class="meta">${escapeHtml(project.recipient)}</p>
+    </div>
+    <div class="badge-row">
+      <span class="badge green">OECD Funded</span>
+      <span class="badge blue">$${escapeHtml(String(project.amount))}M · ${escapeHtml(String(project.year))}</span>
+    </div>
+  </article>`;
+}
+
+function gfHistoryCard(project) {
+  return `<article class="history-item">
+    <div>
+      <h3>${escapeHtml(project.title)}</h3>
+      <p class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.region)} · ${escapeHtml(project.sector)}</p>
+      <p class="meta">${escapeHtml(project.recipient)}</p>
+    </div>
+    <div class="activity-stats">
+      <div><span>Recorded Amount</span><strong>$${escapeHtml(String(project.amount))}M</strong></div>
+      <div><span>Year</span><strong>${escapeHtml(String(project.year))}</strong></div>
+      <div><span>Source</span><strong>OECD / Gates Foundation</strong></div>
+    </div>
+  </article>`;
+}
+
 function queueProjectCard(project) {
   return `<article class="queue-card">
     <button class="queue-card-remove" data-remove-project="${escapeHtml(project.id)}" title="Remove from queue">×</button>
@@ -1162,13 +1347,12 @@ function queueProjectCard(project) {
 
 function fundedProjectCard(project) {
   const intel = getIntel(project.id);
-  const leadFunder = intel.potentialFunders?.[0]?.name || "Opportunity Atlas funder";
   return `<article class="history-item">
     <div>
       <h3>${escapeHtml(project.title)}</h3>
       <p class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.region)} · ${escapeHtml(project.sector)}</p>
       <button class="builder-link" data-builder-id="${escapeHtml(project.builderId)}" data-project-id="${escapeHtml(project.id)}" type="button">${escapeHtml(builderName(project))}</button>
-      <p class="meta">Recorded by ${escapeHtml(leadFunder)} as a demo funding decision.</p>
+      <p class="meta">Recorded by ${escapeHtml(FUNDER_ACCOUNT.name)} as a demo funding decision.</p>
     </div>
     <div class="badge-row">
       <span class="badge green">Funding status: Funded</span>
@@ -1189,10 +1373,14 @@ function fundedProjectCard(project) {
 
 function renderQueueGroup(title, status) {
   const grouped = projects.filter((project) => getReviewStatus(project) === status);
+  const gfExtra = status === "Funded" ? gfFundedProjects : [];
+  const total = grouped.length + gfExtra.length;
   return `<section class="card queue-group">
-    ${sectionHeader(title, `${grouped.length} project${grouped.length === 1 ? "" : "s"}`)}
+    ${sectionHeader(title, `${total} project${total === 1 ? "" : "s"}`)}
     <div class="queue-list">
-      ${grouped.length ? grouped.map(queueProjectCard).join("") : `<div class="empty">No projects in this status yet.</div>`}
+      ${total
+        ? grouped.map(queueProjectCard).join("") + gfExtra.map(gfQueueCard).join("")
+        : `<div class="empty">No projects in this status yet.</div>`}
     </div>
   </section>`;
 }
@@ -1217,23 +1405,26 @@ function renderFunderHistory() {
   const target = $("#funder-history");
   if (!target) return;
   const funded = projects.filter((project) => getReviewStatus(project) === "Funded");
-  const recordedFunding = funded.reduce((sum, project) => sum + fundingAmountValue(getRecordedAmount(project)), 0);
+  const demoFundedMM = funded.reduce((sum, project) => sum + fundingAmountValue(getRecordedAmount(project)), 0);
+  const gfFundedMM = gfFundedProjects.reduce((sum, p) => sum + p.amount, 0);
   const activePipeline = projects.filter((project) => ["Shortlisted", "Evidence requested", "Invited to apply"].includes(getReviewStatus(project))).length;
+  const totalCount = funded.length + gfFundedProjects.length;
   target.innerHTML = `
     ${pageHeader(
       "funder-history-title",
       "Funding History",
       "Track projects your funder team has marked as funded in this demo workflow.",
     )}
-    <section class="grid four">
-      ${kpi("Funded Projects", funded.length)}
-      ${kpi("Recorded Funding", fundingAmountLabel(recordedFunding))}
+    <section class="grid three">
+      ${kpi("Funded Projects", totalCount)}
+      ${kpi("Recorded Funding", formatMillions(demoFundedMM + gfFundedMM))}
       ${kpi("Active Pipeline", activePipeline)}
-      ${kpi("Self-Reported Profiles", projects.length)}
     </section>
     <section class="section card">
       ${sectionHeader("Recorded Funding History", "Projects marked funded from the Evaluation Packet action bar.")}
-      ${funded.length ? `<div class="history-list">${funded.map(fundedProjectCard).join("")}</div>` : `<div class="empty">No funded projects recorded yet. Open an Evaluation Packet and click Record Funding to add one here.</div>`}
+      ${totalCount
+        ? `<div class="history-list">${funded.map(fundedProjectCard).join("")}${gfFundedProjects.map(gfHistoryCard).join("")}</div>`
+        : `<div class="empty">No funded projects recorded yet. Open an Evaluation Packet and click Record Funding to add one here.</div>`}
     </section>
     <section class="section note-panel">
       <strong>Demo record only:</strong> Recording funding here does not execute a financial transaction. It only helps funders track which projects they have marked as funded inside this prototype.
@@ -1375,12 +1566,6 @@ function renderBuilderHistory(projectList) {
             <span class="badge ${gapClass(project.opportunityGap)}">Opportunity Gap: ${escapeHtml(project.opportunityGap)}</span>
             <span class="badge ${reviewStatusClass(reviewStatus)}">${escapeHtml(reviewStatus)}</span>
           </div>
-          <div class="activity-stats">
-            <div><span>Appeared in searches</span><strong>${escapeHtml(activity.searchAppearances || 0)}</strong></div>
-            <div><span>Project views</span><strong>${escapeHtml(activity.projectViews || 0)}</strong></div>
-            <div><span>Profile views</span><strong>${escapeHtml(activity.profileViews || 0)}</strong></div>
-            <div><span>Latest viewer</span><strong>${escapeHtml(latestViewerLabel(activity))}</strong></div>
-          </div>
           <div class="action-row">
             <a class="btn" href="../funder/index.html#discovery">View in Funder Dashboard</a>
             <button class="btn contact-funder-btn" data-project-id="${escapeHtml(project.id)}">Contact Funder</button>
@@ -1449,7 +1634,7 @@ function builderNotifications(projectList) {
       notifications.push({
         label: "Review status",
         title: `${project.title} is now marked: ${reviewStatus}`,
-        text: "This status reflects funder actions taken inside the current Opportunity Atlas demo workflow.",
+        text: "This status reflects funder actions taken inside the current First Spark demo workflow.",
         date: activity.lastViewedAt || activity.submittedAt,
       });
     }
@@ -1489,17 +1674,14 @@ function renderBuilderNotifications(projectList) {
 function renderBuilderDashboard() {
   const submitted = builderProjects();
   const activities = submitted.map((project) => getBuilderActivity(project));
-  const searchTotal = activities.reduce((sum, activity) => sum + Number(activity.searchAppearances || 0), 0);
-  const projectViewTotal = activities.reduce((sum, activity) => sum + Number(activity.projectViews || 0), 0);
-  const profileViewTotal = activities.reduce((sum, activity) => sum + Number(activity.profileViews || 0), 0);
-
-  return `<section class="builder-dashboard">
-    <section class="grid four">
-      ${kpi("Submitted Profiles", submitted.length)}
-      ${kpi("Appeared in Searches", searchTotal)}
-      ${kpi("Project Views", projectViewTotal)}
-      ${kpi("Profile Views", profileViewTotal)}
-    </section>
+  const searchTotal = activities.reduce((sum, a) => sum + Number(a.searchAppearances || 0), 0);
+  const projectViewTotal = activities.reduce((sum, a) => sum + Number(a.projectViews || 0), 0);
+  const profileViewTotal = activities.reduce((sum, a) => sum + Number(a.profileViews || 0), 0);
+  return `<section class="grid four">
+    ${kpi("Submitted Profiles", submitted.length)}
+    ${kpi("Appeared in Searches", searchTotal)}
+    ${kpi("Project Views", projectViewTotal)}
+    ${kpi("Profile Views", profileViewTotal)}
   </section>`;
 }
 
@@ -1516,7 +1698,6 @@ function renderBuilderHistoryPage() {
       "",
       "Builder Portal",
     )}
-    ${renderBuilderDashboard()}
     <section class="section card">
       ${sectionHeader("Submitted Projects", "These profiles are visible to funders in the Discovery workflow.")}
       ${renderBuilderHistory(submitted)}
@@ -1603,7 +1784,6 @@ function renderFunders(funders) {
 }
 
 function renderReadinessPanel(project, readiness) {
-  const evidence = evidenceItems(project);
   const strengths = [
     project.description ? "Problem described" : "Problem needs detail",
     project.beneficiaries ? "Beneficiaries named" : "Beneficiaries unclear",
@@ -1629,10 +1809,6 @@ function renderReadinessPanel(project, readiness) {
       <div>
         <span>Stage</span>
         <strong>${escapeHtml(project.stage)}</strong>
-      </div>
-      <div>
-        <span>Evidence Fields</span>
-        <strong>${escapeHtml(evidence.available.length)}/6</strong>
       </div>
       <div>
         <span>Needs Review</span>
@@ -1867,7 +2043,7 @@ function messageSide(sender) {
 }
 
 function messageSenderName(message, thread) {
-  if (message.system) return "Opportunity Atlas";
+  if (message.system) return "First Spark";
   if (message.sender === currentSenderLabel()) return "You";
   if (message.sender === "Builder") return thread.builderName || "Builder";
   if (message.sender === "Funder") return thread.funderName || "Funder";
@@ -2186,6 +2362,7 @@ document.addEventListener("submit", (event) => {
   renderSubmit();
 });
 
+seedGatesFoundationDemo();
 initializeStoredData();
 if (state.page === "discovery") {
   recordBuilderSearchAppearances(projects.filter(matchesFilter), "Discover Projects");
