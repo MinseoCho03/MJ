@@ -558,7 +558,6 @@ function renderOverview() {
       "Discover overlooked young builders through their projects.",
       "Opportunity Atlas turns self-reported local projects into structured, funder-readable opportunity profiles, helping opportunity providers discover young builders beyond traditional credentials and networks.",
     )}
-    ${funderWorkflow("discover")}
     <section class="grid four">
       ${kpi("Submitted Projects", projects.length)}
       ${kpi("Countries Represented", countryCount)}
@@ -619,7 +618,6 @@ function renderDiscovery() {
       "Discover Projects",
       "Browse self-reported projects from young builders and grassroots teams.",
     )}
-    ${funderWorkflow("discover")}
     <section class="filter-panel" aria-label="Project filters">
       ${filterOptions("Country", "country", ["All", "Ghana", "India", "Kenya", "Nigeria", "Indonesia"])}
       ${filterOptions("Sector", "sector", ["All", "Education", "Health", "Climate", "Agriculture", "Civic Tech"])}
@@ -670,7 +668,6 @@ function renderQueue() {
       "Review Queue",
       "Manage project review statuses after discovery and evaluation.",
     )}
-    ${funderWorkflow("manage")}
     <section class="queue-grid">
       ${renderQueueGroup("Shortlisted", "Shortlisted")}
       ${renderQueueGroup("Evidence Requested", "Evidence requested")}
@@ -809,7 +806,6 @@ function renderDetail() {
        <button class="btn review-action" data-action="evidence">Request Evidence</button>
        <button class="btn primary review-action" data-action="invite">Invite to Apply</button>`,
     )}
-    ${funderWorkflow("review")}
     ${state.reviewMessage ? `<div class="toast">${escapeHtml(state.reviewMessage)}</div>` : ""}
     <section class="packet-strip">
       <article><span>Packet Type</span><strong>Funder Review</strong></article>
@@ -1000,7 +996,6 @@ function renderSignals() {
       "OECD Funding Signals",
       "Explore historical philanthropy funding patterns used to contextualize local projects.",
     )}
-    ${funderWorkflow("review")}
     <section class="grid four">
       ${kpi("Total Funding", metrics.totalFundingLabel || "$68.2B")}
       ${kpi("Funding Records", metrics.recordCountLabel || "116K+")}
