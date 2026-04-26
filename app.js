@@ -1145,6 +1145,7 @@ function renderDiscovery() {
 
 function queueProjectCard(project) {
   return `<article class="queue-card">
+    <button class="queue-card-remove" data-remove-project="${escapeHtml(project.id)}" title="Remove from queue">×</button>
     <div>
       <h3>${escapeHtml(project.title)}</h3>
       <p class="meta">${escapeHtml(project.country)} · ${escapeHtml(project.sector)}</p>
@@ -2100,6 +2101,17 @@ document.addEventListener("click", (event) => {
   if (editAmountBtn) {
     const project = projects.find((p) => p.id === editAmountBtn.dataset.projectId);
     if (project) showFundModal(project, true);
+  }
+
+  const removeBtn = event.target.closest(".queue-card-remove");
+  if (removeBtn) {
+    const project = projects.find((p) => p.id === removeBtn.dataset.removeProject);
+    if (project) {
+      project.reviewStatus = "Not reviewed";
+      saveReviewStatuses();
+      renderQueue();
+      renderFunderHistory();
+    }
   }
 });
 
