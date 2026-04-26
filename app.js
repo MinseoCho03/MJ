@@ -115,20 +115,120 @@ const projects = [
   },
 ];
 
-const manualSector = [
-  { label: "Education", count: 8 },
-  { label: "Health", count: 6 },
-  { label: "Climate", count: 4 },
-  { label: "Agriculture", count: 3 },
-  { label: "Civic Tech", count: 3 },
+const generatedProjectThemes = [
+  ["Solar study hubs for exam prep", "Education", "Digital learning / school access", "Secondary school students", "Prototype"],
+  ["Mobile clinic queue coordination tool", "Health", "Primary care access", "Rural patients", "Pilot-ready"],
+  ["Low-cost drip irrigation sensor kit", "Agriculture", "Smallholder productivity", "Smallholder farmers", "Prototype"],
+  ["Flood reporting map for informal settlements", "Civic Tech", "Disaster response / mapping", "Low-income communities", "Active users"],
+  ["Girls coding club learning tracker", "Education", "STEM education / youth skills", "Girls in public schools", "Pilot-ready"],
+  ["Community medicine stockout alert", "Health", "Clinic supply chain", "Rural clinics", "Prototype"],
+  ["Clean cooking repair network", "Climate", "Clean energy / household resilience", "Women-led households", "Idea"],
+  ["Market price voice bot for farmers", "Agriculture", "Farmer advisory / market access", "Smallholder farmers", "Prototype"],
+  ["Youth civic issue reporting hotline", "Civic Tech", "Community accountability", "Youth organizers", "Active users"],
+  ["Offline teacher resource library", "Education", "Teacher training / offline content", "Rural teachers", "Prototype"],
+  ["Maternal appointment reminder system", "Health", "Maternal health / SMS reminders", "Pregnant women", "Pilot-ready"],
+  ["Rainwater harvesting maintenance app", "Climate", "Water resilience / adaptation", "Peri-urban households", "Prototype"],
+  ["Seed exchange coordination platform", "Agriculture", "Local seed systems", "Farmer cooperatives", "Idea"],
+  ["Public library tutoring scheduler", "Education", "Tutoring access / public learning spaces", "Public school students", "Prototype"],
+  ["Air quality sensor youth network", "Climate", "Air quality / citizen science", "Urban youth", "Active users"],
+  ["Water point repair reporting tool", "Civic Tech", "Water safety / public services", "Rural communities", "Prototype"],
+  ["Community health worker route planner", "Health", "Community health delivery", "Community health workers", "Pilot-ready"],
+  ["Recycling pickup micro-franchise tracker", "Climate", "Waste management / circular economy", "Young waste collectors", "Prototype"],
+  ["Inclusive reading app for low-vision learners", "Education", "Accessible learning", "Students with low vision", "Idea"],
+  ["Farm pest image diagnosis assistant", "Agriculture", "Crop risk / pest advisory", "Smallholder farmers", "Prototype"],
 ];
 
-const manualRegion = [
-  { label: "West Africa", count: 8 },
-  { label: "South Asia", count: 6 },
-  { label: "East Africa", count: 5 },
-  { label: "Latin America", count: 5 },
+const generatedCountries = [
+  ["Ghana", "West Africa"],
+  ["Nigeria", "West Africa"],
+  ["Kenya", "East Africa"],
+  ["Uganda", "East Africa"],
+  ["Tanzania", "East Africa"],
+  ["India", "South Asia"],
+  ["Bangladesh", "South Asia"],
+  ["Nepal", "South Asia"],
+  ["Indonesia", "Southeast Asia"],
+  ["Philippines", "Southeast Asia"],
+  ["Colombia", "Latin America"],
+  ["Peru", "Latin America"],
+  ["Brazil", "Latin America"],
 ];
+
+const generatedBuilderNames = [
+  "Maya Mensah",
+  "Ibrahim Okoro",
+  "Njeri Wanjiku",
+  "Asha Patel",
+  "Rizal Santoso",
+  "Camila Rojas",
+  "Thandi Ndlovu",
+  "Farah Rahman",
+  "Joao Silva",
+  "Lina Quispe",
+  "Samira Khan",
+  "Kofi Adjei",
+];
+
+function generatedReadiness(stage) {
+  if (stage === "Pilot-ready" || stage === "Active users") return "Pilot-ready";
+  if (stage === "Prototype") return "Pilot-oriented prototype";
+  return "Early-stage";
+}
+
+function generatedReadinessFilter(readiness) {
+  if (readiness === "Pilot-ready") return "Pilot-ready";
+  if (readiness === "Early-stage") return "Early-stage";
+  return "Pilot-oriented";
+}
+
+function generatedGap(index) {
+  return ["Medium", "Medium-High", "High", "Medium", "Low"][index % 5];
+}
+
+function makeGeneratedProject(index) {
+  const theme = generatedProjectThemes[index % generatedProjectThemes.length];
+  const country = generatedCountries[index % generatedCountries.length];
+  const builderNameValue = generatedBuilderNames[index % generatedBuilderNames.length];
+  const stage = theme[4];
+  const readiness = generatedReadiness(stage);
+  const fundingNeed = `$${8000 + ((index * 1700) % 34000)}`;
+  const suffix = index + 6;
+  return {
+    id: `generated-project-${suffix}`,
+    title: `${theme[0]} ${suffix}`,
+    country: country[0],
+    region: country[1],
+    sector: theme[1],
+    subsector: theme[2],
+    beneficiaries: theme[3],
+    stage,
+    fundingNeed,
+    readiness,
+    readinessFilter: generatedReadinessFilter(readiness),
+    opportunityGap: generatedGap(index),
+    verification: "Self-reported",
+    builderId: `builder-${suffix}`,
+    builderName: builderNameValue,
+    builderRole: index % 3 === 0 ? "Student builder" : index % 3 === 1 ? "Grassroots project lead" : "Young founder",
+    builderLocation: country[0],
+    description: `${builderNameValue} is developing ${theme[0].toLowerCase()} for ${theme[3].toLowerCase()} in ${country[0]}, with a focus on practical local adoption and evidence gathering.`,
+  };
+}
+
+projects.push(...Array.from({ length: 95 }, (_, index) => makeGeneratedProject(index)));
+
+function countBy(items, labels, matcher) {
+  return labels.map((label) => ({
+    label,
+    count: items.filter((item) => matcher(item, label)).length,
+  }));
+}
+
+const manualSector = countBy(projects, ["Education", "Health", "Climate", "Agriculture", "Civic Tech"], (project, label) =>
+  String(project.sector || "").includes(label),
+);
+
+const manualRegion = countBy(projects, ["West Africa", "South Asia", "East Africa", "Latin America"], (project, label) => project.region === label);
 
 const gfFundedProjects = [
   // Health – Malaria
@@ -1276,6 +1376,10 @@ function matchesFilter(project) {
   );
 }
 
+function projectCountryOptions() {
+  return ["All", ...Array.from(new Set(projects.map((project) => project.country))).sort()];
+}
+
 function renderDiscovery() {
   const visible = projects.filter(matchesFilter);
   $("#discovery").innerHTML = `
@@ -1285,7 +1389,7 @@ function renderDiscovery() {
       "Browse self-reported projects from young builders and grassroots teams.",
     )}
     <section class="filter-panel" aria-label="Project filters">
-      ${filterOptions("Country", "country", ["All", "Ghana", "India", "Kenya", "Nigeria", "Indonesia"])}
+      ${filterOptions("Country", "country", projectCountryOptions())}
       ${filterOptions("Sector", "sector", ["All", "Education", "Health", "Climate", "Agriculture", "Civic Tech"])}
       ${filterOptions("Stage", "stage", ["All", "Idea", "Prototype", "Pilot-ready", "Active users"])}
       ${filterOptions("Readiness", "readiness", ["All", "Early-stage", "Pilot-oriented", "Pilot-ready"])}
